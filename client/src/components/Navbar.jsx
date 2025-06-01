@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { isAuthenticated } from '../utils/auth';
+import { ThemeContext } from '../context/ThemeContext';
+
 
 const Navbar = () => {
+  const { darkMode, setDarkMode} = useContext(ThemeContext); //gets the dark mode state
   const navigate = useNavigate();
 
   // Handle logout by clearing localStorage and redirecting
@@ -13,9 +16,16 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-white shadow-md px-6 py-4 flex justify-between items-center">
+    <nav className="bg-white dark:bg-gray-900 shadow-md px-6 py-4 flex justify-between items-center">
       {/* App logo/title */}
-      <h1 className="text-xl font-bold text-blue-600">Job Tracker</h1>
+      <h1 className="text-xl dark:text-white font-bold text-blue-600 ">Job Tracker</h1>
+
+      <button
+        onClick={() => setDarkMode(!darkMode)}
+        className="px-3 py-1 border rounded text-sm"
+      >
+        {darkMode ? "☀ Light" : "🌙 Dark"}
+      </button>
 
       {/* Right side navigation links */}
       <div className="space-x-4">

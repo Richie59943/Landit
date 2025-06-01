@@ -4,12 +4,15 @@ import Login from './pages/Login' // import from the log in page
 import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
 import Navbar from './components/Navbar';
+import { ThemeProvider } from './context/ThemeContext';
 
 
 
 
 const App = () => {
   return (
+    <div className='min-h-screen bg-gray-100 text-black dark:bg-gray-900 dark:text-white'>
+    <ThemeProvider>
     <BrowserRouter>
     <Navbar /> { }
       <Routes>
@@ -23,6 +26,8 @@ const App = () => {
         
       </Routes>
     </BrowserRouter>
+    </ThemeProvider>
+    </div>
   );
 };
 
