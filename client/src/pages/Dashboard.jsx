@@ -95,15 +95,15 @@ const updateStatus = async (jobId, newStatus) => {
 
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
-      <h1 className="text-3xl font-bold text-blue-600 mb-6">Dashboard</h1>
+    <div className="p-6 max-w-3xl mx-auto dark:bg-gray-900">
+      <h1 className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-6">Dashboard</h1>
 
       {/* Error Message */}
-      {error && <p className="text-red-600 mb-4">{error}</p>}
+      {error && <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>}
 
       {/* New Job Form */}
-      <form onSubmit={handleAddJob} className="mb-8 bg-white shadow p-6 rounded space-y-4">
-        <h2 className="text-xl font-semibold text-gray-700">Add New Job</h2>
+      <form onSubmit={handleAddJob} className="mb-8 bg-white dark:bg-gray-800 shadow p-6 rounded space-y-4">
+        <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-200">Add New Job</h2>
 
         <input
           type="text"
@@ -111,7 +111,7 @@ const updateStatus = async (jobId, newStatus) => {
           onChange={(e) => setCompany(e.target.value)}
           placeholder="Company"
           required
-          className="w-full border px-4 py-2 rounded"
+          className="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white px-4 py-2 rounded"
         />
 
         <input
@@ -120,13 +120,13 @@ const updateStatus = async (jobId, newStatus) => {
           onChange={(e) => setPosition(e.target.value)}
           placeholder="Position"
           required
-          className="w-full border px-4 py-2 rounded"
+          className="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white px-4 py-2 rounded"
         />
 
         <select
           value={status}
           onChange={(e) => setStatus(e.target.value)}
-          className="w-full border px-4 py-2 rounded"
+          className="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white px-4 py-2 rounded"
         >
           <option value="Applied">Applied</option>
           <option value="Interview">Interview</option>
@@ -138,10 +138,10 @@ const updateStatus = async (jobId, newStatus) => {
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           placeholder="Notes (optional)"
-          className="w-full border px-4 py-2 rounded"
+          className="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white px-4 py-2 rounded"
         />
 
-        <button type="submit" className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
+        <button type="submit" className="bg-blue-600 dark:bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700 dark:hover:bg-blue-600">
           Add Job
         </button>
       </form>
