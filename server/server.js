@@ -6,6 +6,8 @@ const jobRoutes = require ('./routes/jobs');
 require('dotenv').config({ path: path.resolve(__dirname, '.env') }); 
  // Imports dotenv to load environment variables from .env file
 
+ const allowedOrigins = ['https://landit.vercel.app', 'https://landit-phi.vercel.app']; // add both for safety
+
 const authRoutes = require("./routes/auth"); // Imports the authRoutes module
 
 const app = express(); // Creates an instance of Express ( or a express app)
