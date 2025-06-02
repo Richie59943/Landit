@@ -90,12 +90,26 @@ const updateStatus = async (jobId, newStatus) => {
 };
 
 
+//groups jobs by thier status into seperate arrays
+const groupedJobs = {
+  Applied: [],
+  Interview: [],
+  Offer:[],
+  Rejected: []
+};
 
+
+//loops throuhg all the jobs and assins them to the corect group
+jobs.forEach((job) => {
+  if(groupedJobs[job.status]) {
+    groupedJobs[job.status].push(job);
+  }
+});
 
 
 
   return (
-    <div className="p-6 max-w-3xl mx-auto dark:bg-gray-900">
+    <div className="p-6 max-w-9xl mx-auto dark:bg-gray-900">
       <h1 className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-6">Dashboard</h1>
 
       {/* Error Message */}
@@ -147,16 +161,30 @@ const updateStatus = async (jobId, newStatus) => {
       </form>
 
       {/* List of Jobs */}
-      <ul className="space-y-4">
-        {jobs.map((job) => (
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+  {Object.entries(groupedJobs).map(([status, jobsInGroup]) => (
+    <div key={status} className="bg-white dark:bg-gray-800 p-4 rounded shadow">
+      <h3 className="text-center font-semibold text-lg text-gray-800 dark:text-white mb-2">
+        {status}
+      </h3>
+
+      {jobsInGroup.length === 0 ? (
+        <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
+          No jobs yet
+        </p>
+      ) : (
+        jobsInGroup.map((job) => (
           <JobCard
             key={job._id}
             job={job}
             onDelete={deleteJob}
             onStatusChange={updateStatus}
           />
-        ))}
-      </ul>
+        ))
+      )}
+    </div>
+  ))}
+</div>
     </div>
   );
 };
