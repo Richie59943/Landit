@@ -26,11 +26,21 @@ app.use((err, req, res, next) => {
 
 // Connect to MongoDB and start server
 const startServer = async () => {
+    // Validate required environment variables
+    if (!process.env.MONGO_URI) {
+        console.error("ERROR: MONGO_URI is not set in .env file");
+        process.exit(1);
+    }
+    if (!process.env.JWT_SECRET) {
+        console.error("ERROR: JWT_SECRET is not set in .env file");
+        process.exit(1);
+    }
+
     try {
         await mongoose.connect(process.env.MONGO_URI);
         console.log("Connected to MongoDB");
         
-        const PORT = process.env.PORT || 5000;
+        const PORT = process.env.PORT || 5001;
         app.listen(PORT, () => {
             console.log(`Server is running on port ${PORT}`);
         });
