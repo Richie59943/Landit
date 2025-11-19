@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import API from '../utils/api';
 import JobCard from '../components/JobCard';
+import { isAuthenticated } from '../utils/auth';
 
 const Dashboard = () => {
   const [jobs, setJobs] = useState([]); // Store job entries
   const [error, setError] = useState(''); // Handle errors
+  const navigate = useNavigate();
 
   // State for form inputs
   const [company, setCompany] = useState('');
@@ -14,8 +17,17 @@ const Dashboard = () => {
 
   const token = localStorage.getItem('token'); // JWT token from login
 
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      navigate('/login');
+    }
+  }, [navigate]);
+
   // Fetch all jobs from backend on page load
   useEffect(() => {
+    if (!token) return; // Don't fetch if no token
+
     const fetchJobs = async () => {
       try {
         const res = await API.get('/jobs', {
@@ -25,12 +37,20 @@ const Dashboard = () => {
         });
         setJobs(res.data); // Save jobs in state
       } catch (err) {
-        setError('Error loading Jobs');
+        console.error('Error fetching jobs:', err);
+        if (err.response?.status === 401 || err.response?.status === 403) {
+          // Token is invalid, redirect to login
+          localStorage.removeItem('token');
+          localStorage.removeItem('userId');
+          navigate('/login');
+        } else {
+          setError('Error loading Jobs');
+        }
       }
     };
 
     fetchJobs();
-  }, [token]);
+  }, [token, navigate]);
 
   // Handle form submit to add a new job
   const handleAddJob = async (e) => {
@@ -74,6 +94,14 @@ const deleteJob = async(jobId) =>{
 
 //adding to update the status 
 const updateStatus = async (jobId, newStatus) => {
+  // Store previous job state for potential rollback
+  const previousJob = jobs.find((j) => j._id === jobId);
+  
+  // Optimistic update - update UI immediately
+  setJobs((prevJobs) => 
+    prevJobs.map((j) => (j._id === jobId ? { ...j, status: newStatus } : j))
+  );
+
   try {
     const res = await API.put(
       `/jobs/${jobId}`,
@@ -82,10 +110,19 @@ const updateStatus = async (jobId, newStatus) => {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       }
     );
-    // Update local state with new status
-    setJobs(jobs.map((j) => (j._id === jobId ? res.data : j)));
+    // Sync with server response (in case server made any changes)
+    setJobs((prevJobs) => 
+      prevJobs.map((j) => (j._id === jobId ? res.data : j))
+    );
   } catch (err) {
     console.error('Update failed:', err);
+    // Revert optimistic update on error
+    if (previousJob) {
+      setJobs((prevJobs) => 
+        prevJobs.map((j) => (j._id === jobId ? previousJob : j))
+      );
+    }
+    setError('Failed to update job status. Please try again.');
   }
 };
 

@@ -1,55 +1,72 @@
-import React from 'react';
-import { format } from 'date-fns'; // used to format the datea 
+import React from "react";
+import { format } from "date-fns"; // used to format the datea
 
-const JobCard = ({ job, onDelete, onStatusChange}) => {// this accepts job data and two functions (the delte and status change)
+const JobCard = ({ job, onDelete, onStatusChange }) => {
+  // this accepts job data and two functions (the delte and status change)
 
-const getStatusColor = (status) => {
-  switch (status) {
-    case 'Applied':
-      return 'bg-blue-200 text-blue-800'; // Light blue
-    case 'Interview':
-      return 'bg-yellow-200 text-yellow-800'; // Yellow
-    case 'Offer':
-      return 'bg-green-200 text-green-800'; // Green
-    case 'Rejected':
-      return 'bg-red-200 text-red-800'; // Red
-    default:
-      return 'bg-gray-200 text-gray-800'; // Fallback
-  }
-};
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "Applied":
+        return "bg-blue-200 text-blue-800"; // Light blue
+      case "Interview":
+        return "bg-yellow-200 text-yellow-800"; // Yellow
+      case "Offer":
+        return "bg-green-200 text-green-800"; // Green
+      case "Rejected":
+        return "bg-red-200 text-red-800"; // Red
+      default:
+        return "bg-gray-200 text-gray-800"; // Fallback
+    }
+  };
 
-
-// using Clearbit LOGO API we are going to conver Name into a domain to grab the logo
-const getLogoUrl = (companyName) => {
-    const domain = companyName.toLowerCase().replace(/\s+/g, '') + '.com'; // turns the name into a domain
+  // using Clearbit LOGO API we are going to conver Name into a domain to grab the logo
+  const getLogoUrl = (companyName) => {
+    const domain = companyName.toLowerCase().replace(/\s+/g, "") + ".com"; // turns the name into a domain
     return `https:logo.clearbit.com/${domain}`;
-};
+  };
 
-return (
-    <div className="bg-white dark:bg-gray-800 shadow-md p-4 rounded-lg mb-4"> {/* Card box */}
-      <div className="flex justify-between items-center mb-2"> {/* Top row: title + status */}
+  return (
+    <div className="bg-white dark:bg-gray-800 shadow-md p-4 rounded-lg mb-4">
+      {" "}
+      {/* Card box */}
+      <div className="flex justify-between items-center mb-2">
+        {" "}
+        {/* Top row: title + status */}
         <div>
-          <h3 className="text-xl font-bold dark:text-white">{job.position}</h3> {/* Job title */}
+          <h3 className="text-xl font-bold dark:text-white">{job.position}</h3>{" "}
+          {/* Job title */}
           <div className="flex items-center gap-2">
             <img
               src={getLogoUrl(job.company)}
               alt={`${job.company} logo`}
               className="w-5 h-5 rounded"
-              onError={(e) => { e.target.style.display = 'none'; }}
+              onError={(e) => {
+                e.target.style.display = "none";
+              }}
             />
-            <p className="text-sm text-gray-600 dark:text-gray-300">{job.company}</p>
+            <p className="text-sm text-gray-600 dark:text-gray-300">
+              {job.company}
+            </p>
           </div>
         </div>
-        <span className={`px-2 py-1 text-sm rounded ${getStatusColor(job.status)}`}> {/* Status badge */}
+        <span
+          className={`px-2 py-1 text-sm rounded ${getStatusColor(job.status)}`}
+        >
+          {" "}
+          {/* Status badge */}
           {job.status}
         </span>
       </div>
-
-      <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">{job.notes}</p> {/* Any notes */}
+      <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">
+        {job.notes}
+      </p>{" "}
+      {/* Any notes */}
       <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
-        Applied on {job.date ? format(new Date(job.date), 'PPP') : 'Unknown'}
+        Applied On{" "}
+        {job.dateApplied || job.date
+          ? format(new Date(job.dateApplied || job.date), "PPP")
+          : "Unknown"}
       </p>
-
       {/* Dropdown to change job status */}
       <select
         value={job.status}
@@ -61,7 +78,6 @@ return (
         <option value="Offer">Offer</option>
         <option value="Rejected">Rejected</option>
       </select>
-
       {/* Delete button */}
       <button
         onClick={() => onDelete(job._id)} // Calls delete function when clicked

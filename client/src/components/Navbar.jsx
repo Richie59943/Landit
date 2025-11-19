@@ -1,24 +1,25 @@
-import React, { useContext } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { isAuthenticated } from '../utils/auth';
-import { ThemeContext } from '../context/ThemeContext';
-
+import React, { useContext } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { isAuthenticated } from "../utils/auth";
+import { ThemeContext } from "../context/ThemeContext";
 
 const Navbar = () => {
-  const { darkMode, setDarkMode} = useContext(ThemeContext); //gets the dark mode state
+  const { darkMode, setDarkMode } = useContext(ThemeContext); //gets the dark mode state
   const navigate = useNavigate();
 
   // Handle logout by clearing localStorage and redirecting
   const handleLogout = () => {
-    localStorage.removeItem('token'); // remove saved token
-    localStorage.removeItem('userId'); // optional
-    navigate('/'); // send user back to login
+    localStorage.removeItem("token"); // remove saved token
+    localStorage.removeItem("userId"); // optional
+    navigate("/"); // send user back to login
   };
 
   return (
     <nav className="bg-white dark:bg-gray-900 shadow-md px-6 py-4 flex justify-between items-center">
       {/* App logo/title */}
-      <h1 className="text-xl dark:text-white font-bold text-blue-600 ">Job Tracker</h1>
+      <h1 className="text-xl dark:text-white font-bold text-blue-600 ">
+        Landit
+      </h1>
 
       <button
         onClick={() => setDarkMode(!darkMode)}
