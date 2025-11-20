@@ -17,15 +17,15 @@ const Navbar = () => {
   return (
     <nav className="bg-white dark:bg-gray-900 shadow-md px-6 py-4 flex justify-between items-center">
       {/* App logo/title */}
-      <h1 className="text-xl dark:text-white font-bold text-blue-600 ">
+      <Link to="/" className="text-xl dark:text-white font-bold text-blue-600 ">
         Landit
-      </h1>
+      </Link>
 
       <button
         onClick={() => setDarkMode(!darkMode)}
         className="px-3 py-1 border rounded text-sm"
       >
-        {darkMode ? "☀ Light" : "🌙 Dark"}
+        {darkMode ? "Light" : "Dark"}
       </button>
 
       {/* Right side navigation links */}
