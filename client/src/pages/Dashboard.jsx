@@ -1,26 +1,28 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import API from '../utils/api';
-import JobCard from '../components/JobCard';
-import { isAuthenticated } from '../utils/auth';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import API from "../utils/api";
+import JobCard from "../components/JobCard";
+import { isAuthenticated } from "../utils/auth";
+import { DndContext } from "@dnd-kit/core";
+import JobColumn from "../components/JobColumn";
 
 const Dashboard = () => {
   const [jobs, setJobs] = useState([]); // Store job entries
-  const [error, setError] = useState(''); // Handle errors
+  const [error, setError] = useState(""); // Handle errors
   const navigate = useNavigate();
 
   // State for form inputs
-  const [company, setCompany] = useState('');
-  const [position, setPosition] = useState('');
-  const [status, setStatus] = useState('Applied'); // Default value
-  const [notes, setNotes] = useState('');
+  const [company, setCompany] = useState("");
+  const [position, setPosition] = useState("");
+  const [status, setStatus] = useState("Applied"); // Default value
+  const [notes, setNotes] = useState("");
 
-  const token = localStorage.getItem('token'); // JWT token from login
+  const token = localStorage.getItem("token"); // JWT token from login
 
   // Redirect if not authenticated
   useEffect(() => {
     if (!isAuthenticated()) {
-      navigate('/login');
+      navigate("/login");
     }
   }, [navigate]);
 
@@ -30,21 +32,21 @@ const Dashboard = () => {
 
     const fetchJobs = async () => {
       try {
-        const res = await API.get('/jobs', {
+        const res = await API.get("/jobs", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
         setJobs(res.data); // Save jobs in state
       } catch (err) {
-        console.error('Error fetching jobs:', err);
+        console.error("Error fetching jobs:", err);
         if (err.response?.status === 401 || err.response?.status === 403) {
           // Token is invalid, redirect to login
-          localStorage.removeItem('token');
-          localStorage.removeItem('userId');
-          navigate('/login');
+          localStorage.removeItem("token");
+          localStorage.removeItem("userId");
+          navigate("/login");
         } else {
-          setError('Error loading Jobs');
+          setError("Error loading Jobs");
         }
       }
     };
@@ -58,7 +60,7 @@ const Dashboard = () => {
 
     try {
       const res = await API.post(
-        '/jobs',
+        "/jobs",
         { company, position, status, notes }, // data to send
         {
           headers: {
@@ -69,160 +71,186 @@ const Dashboard = () => {
 
       setJobs([res.data, ...jobs]); // Add new job to top of the list
       // Reset the form
-      setCompany('');
-      setPosition('');
-      setStatus('Applied');
-      setNotes('');
+      setCompany("");
+      setPosition("");
+      setStatus("Applied");
+      setNotes("");
     } catch (err) {
-      setError('Failed to add job');
+      setError("Failed to add job");
     }
   };
 
-
-//adding the delete job 
-const deleteJob = async(jobId) =>{
-  try {
-    await API.delete(`/jobs/${jobId}`, { // waitng for the api and gets the information 
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}`},
-    });
-    setJobs((prevJobs) => prevJobs.filter((job) => job._id !== jobId)); // removes from the state and keeps the ones we didnt delete
-  } catch(err) {
-    console.error('Delete Failed:',err);
-  }
-};
-
-
-//adding to update the status 
-const updateStatus = async (jobId, newStatus) => {
-  // Store previous job state for potential rollback
-  const previousJob = jobs.find((j) => j._id === jobId);
-  
-  // Optimistic update - update UI immediately
-  setJobs((prevJobs) => 
-    prevJobs.map((j) => (j._id === jobId ? { ...j, status: newStatus } : j))
-  );
-
-  try {
-    const res = await API.put(
-      `/jobs/${jobId}`,
-      { status: newStatus },
-      {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-      }
-    );
-    // Sync with server response (in case server made any changes)
-    setJobs((prevJobs) => 
-      prevJobs.map((j) => (j._id === jobId ? res.data : j))
-    );
-  } catch (err) {
-    console.error('Update failed:', err);
-    // Revert optimistic update on error
-    if (previousJob) {
-      setJobs((prevJobs) => 
-        prevJobs.map((j) => (j._id === jobId ? previousJob : j))
-      );
+  //adding the delete job
+  const deleteJob = async (jobId) => {
+    try {
+      await API.delete(`/jobs/${jobId}`, {
+        // waitng for the api and gets the information
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      setJobs((prevJobs) => prevJobs.filter((job) => job._id !== jobId)); // removes from the state and keeps the ones we didnt delete
+    } catch (err) {
+      console.error("Delete Failed:", err);
     }
-    setError('Failed to update job status. Please try again.');
-  }
-};
+  };
 
+  //adding to update the status
+  const updateStatus = async (jobId, newStatus) => {
+    // Store previous job state for potential rollback
+    const previousJob = jobs.find((j) => j._id === jobId);
 
-//groups jobs by thier status into seperate arrays
-const groupedJobs = {
-  Applied: [],
-  Interview: [],
-  Offer:[],
-  Rejected: []
-};
+    // Optimistic update - update UI immediately
+    setJobs((prevJobs) =>
+      prevJobs.map((j) => (j._id === jobId ? { ...j, status: newStatus } : j))
+    );
 
+    try {
+      const res = await API.put(
+        `/jobs/${jobId}`,
+        { status: newStatus },
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
+      );
+      // Sync with server response (in case server made any changes)
+      setJobs((prevJobs) =>
+        prevJobs.map((j) => (j._id === jobId ? res.data : j))
+      );
+    } catch (err) {
+      console.error("Update failed:", err);
+      // Revert optimistic update on error
+      if (previousJob) {
+        setJobs((prevJobs) =>
+          prevJobs.map((j) => (j._id === jobId ? previousJob : j))
+        );
+      }
+      setError("Failed to update job status. Please try again.");
+    }
+  };
 
-//loops throuhg all the jobs and assins them to the corect group
-jobs.forEach((job) => {
-  if(groupedJobs[job.status]) {
-    groupedJobs[job.status].push(job);
-  }
-});
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+    if (!over) return; // dropoped outside any column do nothing
+    const jobId = active.id; // from jobcard useDraggable ({id: job._id})
+    const newStatus = over.id; // from Job column use Droppable({id: status}
+    const job = jobs.find((j) => j._id === jobId);
+    if (job.status !== newStatus) {
+      updateStatus(jobId, newStatus);
+    }
+  };
+  //groups jobs by thier status into seperate arrays
+  const groupedJobs = {
+    Applied: [],
+    Interview: [],
+    Offer: [],
+    Rejected: [],
+  };
 
-
+  //loops throuhg all the jobs and assins them to the corect group
+  jobs.forEach((job) => {
+    if (groupedJobs[job.status]) {
+      groupedJobs[job.status].push(job);
+    }
+  });
 
   return (
-    <div className="p-6 max-w-9xl mx-auto dark:bg-gray-900">
-      <h1 className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-6">Dashboard</h1>
+    // ✅ NEW: wrap the whole dashboard in DndContext
+    <DndContext onDragEnd={handleDragEnd}>
+      <div className="p-6 max-w-9xl mx-auto dark:bg-gray-900">
+        <h1 className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-6">
+          Dashboard
+        </h1>
 
-      {/* Error Message */}
-      {error && <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>}
+        {/* Error Message */}
+        {error && (
+          <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
+        )}
 
-      {/* New Job Form */}
-      <form onSubmit={handleAddJob} className="mb-8 bg-white dark:bg-gray-800 shadow p-6 rounded space-y-4">
-        <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-200">Add New Job</h2>
-
-        <input
-          type="text"
-          value={company}
-          onChange={(e) => setCompany(e.target.value)}
-          placeholder="Company"
-          required
-          className="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white px-4 py-2 rounded"
-        />
-
-        <input
-          type="text"
-          value={position}
-          onChange={(e) => setPosition(e.target.value)}
-          placeholder="Position"
-          required
-          className="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white px-4 py-2 rounded"
-        />
-
-        <select
-          value={status}
-          onChange={(e) => setStatus(e.target.value)}
-          className="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white px-4 py-2 rounded"
+        {/* New Job Form (unchanged) */}
+        <form
+          onSubmit={handleAddJob}
+          className="mb-8 bg-white dark:bg-gray-800 shadow p-6 rounded space-y-4"
         >
-          <option value="Applied">Applied</option>
-          <option value="Interview">Interview</option>
-          <option value="Offer">Offer</option>
-          <option value="Rejected">Rejected</option>
-        </select>
+          <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-200">
+            Add New Job
+          </h2>
 
-        <textarea
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          placeholder="Notes (optional)"
-          className="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white px-4 py-2 rounded"
-        />
+          <input
+            type="text"
+            value={company}
+            onChange={(e) => setCompany(e.target.value)}
+            placeholder="Company"
+            required
+            className="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white px-4 py-2 rounded"
+          />
 
-        <button type="submit" className="bg-blue-600 dark:bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700 dark:hover:bg-blue-600">
-          Add Job
-        </button>
-      </form>
+          <input
+            type="text"
+            value={position}
+            onChange={(e) => setPosition(e.target.value)}
+            placeholder="Position"
+            required
+            className="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white px-4 py-2 rounded"
+          />
 
-      {/* List of Jobs */}
-<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-  {Object.entries(groupedJobs).map(([status, jobsInGroup]) => (
-    <div key={status} className="bg-white dark:bg-gray-800 p-4 rounded shadow">
-      <h3 className="text-center font-semibold text-lg text-gray-800 dark:text-white mb-2">
-        {status}
-      </h3>
+          <select
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+            className="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white px-4 py-2 rounded"
+          >
+            <option value="Applied">Applied</option>
+            <option value="Interview">Interview</option>
+            <option value="Offer">Offer</option>
+            <option value="Rejected">Rejected</option>
+          </select>
 
-      {jobsInGroup.length === 0 ? (
-        <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
-          No jobs yet
-        </p>
-      ) : (
-        jobsInGroup.map((job) => (
-          <JobCard
-            key={job._id}
-            job={job}
+          <textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Notes (optional)"
+            className="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white px-4 py-2 rounded"
+          />
+
+          <button
+            type="submit"
+            className="bg-blue-600 dark:bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700 dark:hover:bg-blue-600"
+          >
+            Add Job
+          </button>
+        </form>
+
+        {/* ✅ NEW: Kanban-style columns using JobColumn */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <JobColumn
+            title="Applied"
+            status="Applied"
+            jobs={groupedJobs.Applied}
             onDelete={deleteJob}
             onStatusChange={updateStatus}
           />
-        ))
-      )}
-    </div>
-  ))}
-</div>
-    </div>
+          <JobColumn
+            title="Interview"
+            status="Interview"
+            jobs={groupedJobs.Interview}
+            onDelete={deleteJob}
+            onStatusChange={updateStatus}
+          />
+          <JobColumn
+            title="Offer"
+            status="Offer"
+            jobs={groupedJobs.Offer}
+            onDelete={deleteJob}
+            onStatusChange={updateStatus}
+          />
+          <JobColumn
+            title="Rejected"
+            status="Rejected"
+            jobs={groupedJobs.Rejected}
+            onDelete={deleteJob}
+            onStatusChange={updateStatus}
+          />
+        </div>
+      </div>
+    </DndContext>
   );
 };
 
