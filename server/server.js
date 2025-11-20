@@ -10,7 +10,7 @@ require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 const allowedOrigins = [
   "http://localhost:5001", // Vite dev (local)
   "https://landitr.vercel.app", // Your main Vercel frontend
-  "https://landit-phi.vercel.app", // Any extra Vercel preview you want to allow
+  "landitr.vercel.app", // Any extra Vercel preview you want to allow
 ];
 
 const authRoutes = require("./routes/auth"); // Imports the auth routes
