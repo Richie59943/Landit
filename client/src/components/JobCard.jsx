@@ -30,7 +30,7 @@ const JobCard = ({ job, onDelete, onStatusChange }) => {
 
   const getLogoUrl = (companyName) => {
     const domain = companyName.toLowerCase().replace(/\s+/g, "") + ".com";
-    return `https:logo.clearbit.com/${domain}`;
+    return `https://logo.clearbit.com/${domain}`;
   };
 
   return (
