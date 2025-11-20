@@ -1,40 +1,50 @@
+// src/components/JobCard.jsx
 import React from "react";
-import { format } from "date-fns"; // used to format the datea
+import { format } from "date-fns";
+import { useDraggable } from "@dnd-kit/core";
 
 const JobCard = ({ job, onDelete, onStatusChange }) => {
-  // this accepts job data and two functions (the delte and status change)
+  const { attributes, listeners, setNodeRef, transform, isDragging } =
+    useDraggable({
+      id: job._id, // unique id for this job
+    });
+
+  const style = transform
+    ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` }
+    : undefined;
 
   const getStatusColor = (status) => {
     switch (status) {
       case "Applied":
-        return "bg-blue-200 text-blue-800"; // Light blue
+        return "bg-blue-200 text-blue-800";
       case "Interview":
-        return "bg-yellow-200 text-yellow-800"; // Yellow
+        return "bg-yellow-200 text-yellow-800";
       case "Offer":
-        return "bg-green-200 text-green-800"; // Green
+        return "bg-green-200 text-green-800";
       case "Rejected":
-        return "bg-red-200 text-red-800"; // Red
+        return "bg-red-200 text-red-800";
       default:
-        return "bg-gray-200 text-gray-800"; // Fallback
+        return "bg-gray-200 text-gray-800";
     }
   };
 
-  // using Clearbit LOGO API we are going to conver Name into a domain to grab the logo
   const getLogoUrl = (companyName) => {
-    const domain = companyName.toLowerCase().replace(/\s+/g, "") + ".com"; // turns the name into a domain
+    const domain = companyName.toLowerCase().replace(/\s+/g, "") + ".com";
     return `https:logo.clearbit.com/${domain}`;
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 shadow-md p-4 rounded-lg mb-4">
-      {" "}
-      {/* Card box */}
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...listeners}
+      {...attributes}
+      className={`bg-white dark:bg-gray-800 shadow-md p-4 rounded-lg mb-4 cursor-grab active:cursor-grabbing transition
+        ${isDragging ? "opacity-70 ring-2 ring-indigo-400" : ""}`}
+    >
       <div className="flex justify-between items-center mb-2">
-        {" "}
-        {/* Top row: title + status */}
         <div>
-          <h3 className="text-xl font-bold dark:text-white">{job.position}</h3>{" "}
-          {/* Job title */}
+          <h3 className="text-xl font-bold dark:text-white">{job.position}</h3>
           <div className="flex items-center gap-2">
             <img
               src={getLogoUrl(job.company)}
@@ -52,25 +62,24 @@ const JobCard = ({ job, onDelete, onStatusChange }) => {
         <span
           className={`px-2 py-1 text-sm rounded ${getStatusColor(job.status)}`}
         >
-          {" "}
-          {/* Status badge */}
           {job.status}
         </span>
       </div>
+
       <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">
         {job.notes}
-      </p>{" "}
-      {/* Any notes */}
+      </p>
+
       <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
         Applied On{" "}
         {job.dateApplied || job.date
           ? format(new Date(job.dateApplied || job.date), "PPP")
           : "Unknown"}
       </p>
-      {/* Dropdown to change job status */}
+
       <select
         value={job.status}
-        onChange={(e) => onStatusChange(job._id, e.target.value)} // Calls function when status changes
+        onChange={(e) => onStatusChange(job._id, e.target.value)}
         className="border dark:border-gray-600 dark:bg-gray-700 dark:text-white p-1 rounded mb-2 text-sm"
       >
         <option value="Applied">Applied</option>
@@ -78,9 +87,9 @@ const JobCard = ({ job, onDelete, onStatusChange }) => {
         <option value="Offer">Offer</option>
         <option value="Rejected">Rejected</option>
       </select>
-      {/* Delete button */}
+
       <button
-        onClick={() => onDelete(job._id)} // Calls delete function when clicked
+        onClick={() => onDelete(job._id)}
         className="ml-4 text-red-600 dark:text-red-400 text-sm hover:underline"
       >
         Delete
@@ -89,4 +98,4 @@ const JobCard = ({ job, onDelete, onStatusChange }) => {
   );
 };
 
-export default JobCard; // Exports the component so it can be used in other files
+export default JobCard;
