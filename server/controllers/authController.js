@@ -1,5 +1,5 @@
 const User = require("../models/User"); // Import the User model
-const bcrypt = require("bcrypt"); // Import bcrypt for password hashing
+const bcrypt = require("bcryptjs"); // Import bcrypt for password hashing
 const jwt = require("jsonwebtoken"); // Import jwt for token generation
 
 const registerUser = async (req, res) => {
