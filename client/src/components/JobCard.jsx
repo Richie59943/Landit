@@ -33,6 +33,17 @@ const JobCard = ({ job, onDelete, onStatusChange }) => {
     return `https://logo.clearbit.com/${domain}`;
   };
 
+  //used on elements where we DO NOT WANT dragging to start
+  const stopDrag = (e) => {
+    e.stopPropagation(); // stops event before the dnd kit sees it
+  };
+
+  //delete handler that also cancels drag
+  const handleDelete = (e) => {
+    e.stopPropagation(); // avoid drag on click
+    onDelete(job._id);
+  };
+
   return (
     <div
       ref={setNodeRef}
@@ -89,8 +100,10 @@ const JobCard = ({ job, onDelete, onStatusChange }) => {
       </select>
 
       <button
-        onClick={() => onDelete(job._id)}
-        className="ml-4 text-red-600 dark:text-red-400 text-sm hover:underline"
+        onClick={handleDelete} //delete + stop drag
+        onMouseDown={stopDrag} // prevent drag on press
+        onPointerDown={stopDrag}
+        className="ml-4 text-red-600 dark:text-red-400 text-sm hover:bg-red-200 dark:hover:bg-red-700 px-2 py-1 rounded"
       >
         Delete
       </button>
