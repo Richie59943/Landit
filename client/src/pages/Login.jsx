@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react"; // React + hooks
 import { useNavigate } from "react-router-dom"; // navigation after login
 import API from "../utils/api"; // axios instance
 import { isAuthenticated } from "../utils/auth"; // check if already logged in
+import LoadingSpinner from "../components/LoadingSpinner"; // loading spinner component
 
 const Login = () => {
   console.log("Login component is rendering");
@@ -12,6 +13,7 @@ const Login = () => {
   const [password, setPassword] = useState(""); // password input
   const [remember, setRemember] = useState(false); // "Remember for 30 days" checkbox
   const [error, setError] = useState(""); // error message
+  const [loading, setLoading] = useState(false); // loading state
 
   const navigate = useNavigate(); // used to redirect
 
@@ -27,6 +29,7 @@ const Login = () => {
     e.preventDefault(); // stop page refresh
 
     try {
+      setLoading(true); // start loading
       // send login request to backend
       const res = await API.post("/auth/login", { email, password });
 
@@ -43,6 +46,8 @@ const Login = () => {
       console.error("Login error:", err);
       const message = err.response?.data?.message || "Login failed";
       setError(message); // show error to user
+    } finally {
+      setLoading(false); // stop loading
     }
   };
 
@@ -162,20 +167,36 @@ const Login = () => {
 
             {/* Primary Sign in button */}
             <button
-              type="submit"
-              className="
-                w-full
-                mt-1
-                rounded-lg
-                bg-sky-500 hover:bg-sky-700
+              type="submit" // button submits the form, which triggers handle login
+              disabled={loading} // while loading is true, user cannot click again
+              className={` w-full mt-1
+                round-lg
+                ${loading ? "bg-sky-400" : "bg-sky-500 hover:bg-sky-700"}
                 text-white
                 text-sm font-semibold
                 py-2.5
-                shadow-md shadow-sky-500/20
+                shawdow-md shawdow-sky-300/20
                 transition-colors
-              "
+                disabled:cursor-not-allowed // show "not-allowed" cursor when disabled
+              `}
             >
-              Sign in
+              {loading ? ( // if loading is true, show spinner + text
+                <div className=" flex items-center justify-center gap-2">
+                  {/* Loading spinner component with size "sm" */}
+                  <div
+                    className="
+                    animate-spin //tailwind spin animation
+                    rounded-full  // circle
+                    h-4 w-4 // size of the spinner
+                    border-2  // thickness of the border
+                    border-white  // border color
+                    border-t-transparent" // makes the top segment transparent for spinner effect
+                  />
+                  <span>Signing In...</span>
+                </div>
+              ) : (
+                "Sign In" // otherwise just show "Sign In"
+              )}
             </button>
 
             {/* Divider */}
