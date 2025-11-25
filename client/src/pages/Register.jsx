@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../utils/api"; // this is out Axios calling the API
 import { isAuthenticated } from "../utils/auth";
+import LoadingSpinner from "../components/LoadingSpinner"; // loading spinner component
 
 const Register = () => {
   const [email, setEmail] = useState(""); // users email input
@@ -9,6 +10,7 @@ const Register = () => {
   const [error, setError] = useState(""); // to store any error
   const navigate = useNavigate(); // hook for redirecting after successfull process
   const [remember, setRemember] = useState(false); // "Remember for 30 days" checkbox
+  const [loading, setLoading] = useState(false); // loading state
 
   useEffect(() => {
     if (isAuthenticated()) {
@@ -20,6 +22,7 @@ const Register = () => {
     e.preventDefault(); // prevents the pafe from reloading after a subimit
 
     try {
+      setLoading(true); // start loading
       // register the user by sending their email and pass word to the backend
       await API.post("/auth/register", { email, password });
 
@@ -37,6 +40,8 @@ const Register = () => {
       // if theres a error (user already exist)
       const msg = err.response?.data?.message || "Registration Failed";
       setError(msg);
+    } finally {
+      setLoading(false); // stop loading
     }
   };
 
@@ -157,19 +162,34 @@ const Register = () => {
             {/* Primary Register button */}
             <button
               type="submit"
-              className="
-                w-full
-                mt-1
-                rounded-lg
-                bg-green-500 hover:bg-green-700
+              disabled={loading} // disable button while loading
+              className={` w-full mt-1
+                round-lg
+                ${loading ? "bg-green-400" : "bg-green-500 hover:bg-green-700"}
                 text-white
                 text-sm font-semibold
                 py-2.5
-                shadow-md shadow-green-500/20
+                shawdow-md shawdow-green-300/20
                 transition-colors
-              "
+              disabled:cursor-not-allowed`}
             >
-              Register
+              {loading ? (
+                <div className="flex items-center justify-center gap-2">
+                  {/* Loading spinner component with size "sm" */}
+                  <div
+                    className="
+                    animate-spin //tailwind spin animation
+                    rounded-full  // circle
+                    h-4 w-4 // size of the spinner
+                    border-2  // thickness of the border
+                    border-white  // border color
+                    border-t-transparent" // makes the top segment transparent for spinner effect
+                  />
+                  <span>Registering...</span>
+                </div>
+              ) : (
+                "Register"
+              )}
             </button>
 
             {/* Divider */}
