@@ -1,6 +1,6 @@
 import React from "react";
 
-const LoadingSpinner = () => {
+const LoadingSpinner = ({ size = "sm", text = "" }) => {
   //pick size classes based on prop
   const sizeClasses =
     size === "lg"
@@ -17,13 +17,13 @@ const LoadingSpinner = () => {
           animate-spin
           rounded-full
           border-t-transparent
-          border-blue-500
+          border-current
           border-solid
           ${sizeClasses}
         `}
       />
       {/* optional text next to spinner */}
-      {text && <span className="text-sm text-gray-600">{text}</span>}
+      {text && <span className="text-sm text-current">{text}</span>}
     </div>
   );
 };

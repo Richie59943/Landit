@@ -16,7 +16,7 @@ const Register = () => {
     if (isAuthenticated()) {
       navigate("/dashboard"); // prevents acces if logged in already
     }
-  }, []);
+  }, [navigate]);
 
   const handleRegister = async (e) => {
     e.preventDefault(); // prevents the pafe from reloading after a subimit
@@ -31,7 +31,7 @@ const Register = () => {
 
       //save the token from JWT and the user id in local storage so we can use it later
       localStorage.setItem("token", res.data.token); // saves the jwt token
-      localStorage.setItem("userID", res.data.userID); // saves user id
+      localStorage.setItem("userId", res.data.userId); // saves user id
 
       //edirect the user to our dashboard after signin in
       navigate("/dashboard");
@@ -119,7 +119,7 @@ const Register = () => {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
+                placeholder="Password"
                 required
                 className="
                   w-full
@@ -137,7 +137,7 @@ const Register = () => {
               />
             </div>
 
-            {/* Remember + forgot password row */}
+            {/* Remember row */}
             <div className="flex items-center justify-between text-xs sm:text-sm">
               <label className="flex items-center gap-2 text-gray-600 dark:text-slate-300">
                 <input
@@ -148,18 +148,6 @@ const Register = () => {
                 />
                 <span>Remember for 30 days</span>
               </label>
-
-              <button
-                type="button"
-                className="text-green-500/90 hover:text-green-700 font-medium"
-                onClick={() => {
-                  // right now this does nothing
-                  // later you can navigate to a /forgot-password route
-                  console.log("Forgot password clicked");
-                }}
-              >
-                Forgot password
-              </button>
             </div>
 
             {/* Error message (if any) */}
@@ -174,69 +162,20 @@ const Register = () => {
               type="submit"
               disabled={loading} // disable button while loading
               className={` w-full mt-1
-                round-lg
+                rounded-lg
                 ${loading ? "bg-green-400" : "bg-green-500 hover:bg-green-700"}
                 text-white
                 text-sm font-semibold
                 py-2.5
-                shawdow-md shawdow-green-300/20
+                shadow-md shadow-green-300/20
                 transition-colors
               disabled:cursor-not-allowed`}
             >
               {loading ? (
-                <div className="flex items-center justify-center gap-2">
-                  {/* Loading spinner component with size "sm" */}
-                  <div
-                    className="
-                    animate-spin //tailwind spin animation
-                    rounded-full  // circle
-                    h-4 w-4 // size of the spinner
-                    border-2  // thickness of the border
-                    border-white  // border color
-                    border-t-transparent" // makes the top segment transparent for spinner effect
-                  />
-                  <span>Registering...</span>
-                </div>
+                <LoadingSpinner text="Registering..." />
               ) : (
                 "Register"
               )}
-            </button>
-
-            {/* Divider */}
-            <div className="flex items-center gap-2 text-[11px] text-gray-400 my-2">
-              <div className="flex-1 h-px bg-gray-200" />
-              <span>or</span>
-              <div className="flex-1 h-px bg-gray-200" />
-            </div>
-
-            {/* Google sign-in button (UI only right now) */}
-            <button
-              type="button"
-              className="
-                w-full
-                border border-gray-300
-                rounded-lg
-                py-2.5
-                flex items-center justify-center
-                gap-2
-                text-sm font-medium
-                bg-white
-                dark:bg-slate-950
-                dark:text-slate-100
-                dark:border-slate-700
-                hover:bg-gray-50
-                dark:hover:bg-slate-900
-              "
-              onClick={() => {
-                console.log("Google sign in clicked");
-                // later you'll wire this up to real Google OAuth
-              }}
-            >
-              {/* Simple G logo circle */}
-              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-white border border-gray-200">
-                <span className="text-xs font-bold text-[#4285F4]">G</span>
-              </span>
-              <span>Sign in with Google</span>
             </button>
           </form>
 

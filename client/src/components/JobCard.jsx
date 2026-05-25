@@ -6,6 +6,10 @@ import { useDraggable } from "@dnd-kit/core";
 const JobCard = ({ job, onDelete, onStatusChange }) => {
   const [logoSource, setLogoSource] = React.useState("clearbit");
 
+  React.useEffect(() => {
+    setLogoSource("clearbit");
+  }, [job.company]);
+
   // set up this card as draggable for dnd-kit
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({
@@ -21,15 +25,15 @@ const JobCard = ({ job, onDelete, onStatusChange }) => {
   const getStatusColor = (status) => {
     switch (status) {
       case "Applied":
-        return "bg-blue-200 text-blue-800";
+        return "bg-blue-50 text-blue-700 ring-blue-200 dark:bg-blue-950 dark:text-blue-200 dark:ring-blue-800";
       case "Interview":
-        return "bg-yellow-200 text-yellow-800";
+        return "bg-amber-50 text-amber-700 ring-amber-200 dark:bg-amber-950 dark:text-amber-200 dark:ring-amber-800";
       case "Offer":
-        return "bg-green-200 text-green-800";
+        return "bg-emerald-50 text-emerald-700 ring-emerald-200 dark:bg-emerald-950 dark:text-emerald-200 dark:ring-emerald-800";
       case "Rejected":
-        return "bg-red-200 text-red-800";
+        return "bg-red-50 text-red-700 ring-red-200 dark:bg-red-950 dark:text-red-200 dark:ring-red-800";
       default:
-        return "bg-gray-200 text-gray-800";
+        return "bg-slate-100 text-slate-700 ring-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700";
     }
   };
 
@@ -52,7 +56,7 @@ const JobCard = ({ job, onDelete, onStatusChange }) => {
     return `https://logo.clearbit.com/${domain}`;
   };
 
-  const companyInitials = job.company
+  const companyInitials = (job.company || "")
     .split(/\s+/)
     .filter(Boolean)
     .slice(0, 2)
@@ -102,26 +106,28 @@ const JobCard = ({ job, onDelete, onStatusChange }) => {
       style={style} // position based on drag
       {...listeners} // pointer listeners for drag
       {...attributes} // aria attributes etc.
-      className={`bg-white dark:bg-gray-800 shadow-md p-4 rounded-lg mb-4 cursor-grab active:cursor-grabbing transition
-        ${isDragging ? "opacity-70 ring-2 ring-indigo-400" : ""}`}
+      className={`cursor-grab rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md active:cursor-grabbing dark:border-slate-800 dark:bg-slate-950
+        ${isDragging ? "opacity-70 ring-2 ring-blue-400" : ""}`}
     >
       {/* top row: position + company + status pill */}
-      <div className="flex justify-between items-center mb-2">
-        <div>
+      <div className="mb-3 flex items-start justify-between gap-3">
+        <div className="min-w-0">
           {/* job title */}
-          <h3 className="text-xl font-bold dark:text-white">{job.position}</h3>
+          <h3 className="truncate text-base font-bold text-slate-950 dark:text-white">
+            {job.position}
+          </h3>
 
           {/* company name with logo */}
           <div className="flex items-center gap-2">
             {logoSource === "initials" ? (
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded bg-slate-100 text-[10px] font-semibold text-slate-600">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-slate-100 text-[10px] font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                 {companyInitials || "Co"}
               </span>
             ) : (
               <img
                 src={getLogoUrl(job.company)}
                 alt={`${job.company} logo`}
-                className="h-5 w-5 shrink-0 rounded bg-slate-100 object-contain"
+                className="h-6 w-6 shrink-0 rounded-md bg-slate-100 object-contain dark:bg-slate-800"
                 onError={() =>
                   setLogoSource((currentSource) =>
                     currentSource === "clearbit" ? "favicon" : "initials"
@@ -129,7 +135,7 @@ const JobCard = ({ job, onDelete, onStatusChange }) => {
                 }
               />
             )}
-            <p className="text-sm text-gray-600 dark:text-gray-300">
+            <p className="truncate text-sm text-slate-500 dark:text-slate-400">
               {job.company}
             </p>
           </div>
@@ -137,7 +143,7 @@ const JobCard = ({ job, onDelete, onStatusChange }) => {
 
         {/* colored status badge */}
         <span
-          className={`px-2 py-1 text-sm rounded ${getStatusColor(job.status)}`}
+          className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ${getStatusColor(job.status)}`}
         >
           {job.status}
         </span>
@@ -145,9 +151,9 @@ const JobCard = ({ job, onDelete, onStatusChange }) => {
 
       {/* salary row (only if we have something to show) */}
       {salaryText && (
-        <p className="text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
+        <p className="mb-2 text-xs font-medium text-slate-600 dark:text-slate-300">
           Salary:{" "}
-          <span className="font-semibold text-gray-900 dark:text-gray-100">
+          <span className="font-semibold text-slate-950 dark:text-slate-100">
             {salaryText}
           </span>
         </p>
@@ -155,13 +161,13 @@ const JobCard = ({ job, onDelete, onStatusChange }) => {
 
       {/* notes */}
       {job.notes && (
-        <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">
+        <p className="mb-3 line-clamp-3 text-sm text-slate-700 dark:text-slate-300">
           {job.notes}
         </p>
       )}
 
       {/* applied date */}
-      <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+      <p className="mb-3 text-xs text-slate-500 dark:text-slate-400">
         Applied on{" "}
         {job.dateApplied || job.appliedDate || job.date || job.createdAt
           ? format(
@@ -186,10 +192,10 @@ const JobCard = ({ job, onDelete, onStatusChange }) => {
             inline-flex
             items-center
             text-xs
+            mb-3 rounded-md
             text-blue-600
-            dark:text-blue-400
-            hover:underline
-            mb-2
+            transition hover:text-blue-700
+            dark:text-blue-300 dark:hover:text-blue-200
           "
         >
           View job posting
@@ -197,7 +203,7 @@ const JobCard = ({ job, onDelete, onStatusChange }) => {
       )}
 
       {/* status select + delete button row */}
-      <div className="flex items-center justify-between mt-2">
+      <div className="mt-3 flex items-center justify-between gap-3 border-t border-slate-100 pt-3 dark:border-slate-800">
         {/* status dropdown (drag should NOT be blocked here, changing is fine) */}
         <select
           value={job.status}
@@ -207,11 +213,14 @@ const JobCard = ({ job, onDelete, onStatusChange }) => {
           onPointerDown={stopDrag}
           className="
             border
-            dark:border-gray-600
-            dark:bg-gray-700
-            dark:text-white
-            px-2 py-1
-            rounded
+            border-slate-300
+            bg-white
+            text-slate-700
+            dark:border-slate-700
+            dark:bg-slate-900
+            dark:text-slate-100
+            px-2.5 py-1.5
+            rounded-md
             text-xs
           "
         >
@@ -227,14 +236,15 @@ const JobCard = ({ job, onDelete, onStatusChange }) => {
           onMouseDown={stopDrag}
           onPointerDown={stopDrag}
           className="
-            ml-4
             text-red-600
-            dark:text-red-400
+            dark:text-red-300
             text-xs
-            hover:bg-red-100
-            dark:hover:bg-red-700/40
-            px-2 py-1
-            rounded
+            font-semibold
+            hover:bg-red-50
+            dark:hover:bg-red-950/50
+            px-2.5 py-1.5
+            rounded-md
+            transition
           "
         >
           Delete

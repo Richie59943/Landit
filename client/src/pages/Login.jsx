@@ -6,8 +6,6 @@ import { isAuthenticated } from "../utils/auth"; // check if already logged in
 import LoadingSpinner from "../components/LoadingSpinner"; // loading spinner component
 
 const Login = () => {
-  console.log("Login component is rendering");
-
   // track form fields
   const [email, setEmail] = useState(""); // email input
   const [password, setPassword] = useState(""); // password input
@@ -35,7 +33,7 @@ const Login = () => {
 
       // save token and user id to localStorage
       localStorage.setItem("token", res.data.token);
-      localStorage.setItem("userID", res.data.userId);
+      localStorage.setItem("userId", res.data.userId);
 
       // if you want to use "remember" later, you could store that here
       // e.g. localStorage.setItem("rememberMe", remember ? "true" : "false");
@@ -125,7 +123,7 @@ const Login = () => {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
+                placeholder="Password"
                 required
                 className="
                   w-full
@@ -143,7 +141,7 @@ const Login = () => {
               />
             </div>
 
-            {/* Remember + forgot password row */}
+            {/* Remember row */}
             <div className="flex items-center justify-between text-xs sm:text-sm">
               <label className="flex items-center gap-2 text-gray-600 dark:text-slate-300">
                 <input
@@ -154,18 +152,6 @@ const Login = () => {
                 />
                 <span>Remember for 30 days</span>
               </label>
-
-              <button
-                type="button"
-                className="text-sky-500/90 hover:text-sky-700 font-medium"
-                onClick={() => {
-                  // right now this does nothing
-                  // later you can navigate to a /forgot-password route
-                  console.log("Forgot password clicked");
-                }}
-              >
-                Forgot password
-              </button>
             </div>
 
             {/* Error message (if any) */}
@@ -180,70 +166,21 @@ const Login = () => {
               type="submit" // button submits the form, which triggers handle login
               disabled={loading} // while loading is true, user cannot click again
               className={` w-full mt-1
-                round-lg
+                rounded-lg
                 ${loading ? "bg-sky-400" : "bg-sky-500 hover:bg-sky-700"}
                 text-white
                 text-sm font-semibold
                 py-2.5
-                shawdow-md shawdow-sky-300/20
+                shadow-md shadow-sky-300/20
                 transition-colors
                 disabled:cursor-not-allowed // show "not-allowed" cursor when disabled
               `}
             >
               {loading ? ( // if loading is true, show spinner + text
-                <div className=" flex items-center justify-center gap-2">
-                  {/* Loading spinner component with size "sm" */}
-                  <div
-                    className="
-                    animate-spin //tailwind spin animation
-                    rounded-full  // circle
-                    h-4 w-4 // size of the spinner
-                    border-2  // thickness of the border
-                    border-white  // border color
-                    border-t-transparent" // makes the top segment transparent for spinner effect
-                  />
-                  <span>Signing In...</span>
-                </div>
+                <LoadingSpinner text="Signing in..." />
               ) : (
                 "Sign In" // otherwise just show "Sign In"
               )}
-            </button>
-
-            {/* Divider */}
-            <div className="flex items-center gap-2 text-[11px] text-gray-400 my-2">
-              <div className="flex-1 h-px bg-gray-200" />
-              <span>or</span>
-              <div className="flex-1 h-px bg-gray-200" />
-            </div>
-
-            {/* Google sign-in button (UI only right now) */}
-            <button
-              type="button"
-              className="
-                w-full
-                border border-gray-300
-                rounded-lg
-                py-2.5
-                flex items-center justify-center
-                gap-2
-                text-sm font-medium
-                bg-white
-                dark:bg-slate-950
-                dark:text-slate-100
-                dark:border-slate-700
-                hover:bg-gray-50
-                dark:hover:bg-slate-900
-              "
-              onClick={() => {
-                console.log("Google sign in clicked");
-                // later you'll wire this up to real Google OAuth
-              }}
-            >
-              {/* Simple G logo circle */}
-              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-white border border-gray-200">
-                <span className="text-xs font-bold text-[#4285F4]">G</span>
-              </span>
-              <span>Sign in with Google</span>
             </button>
           </form>
 

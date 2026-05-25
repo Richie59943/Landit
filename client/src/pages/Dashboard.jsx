@@ -5,11 +5,13 @@ import API from "../utils/api"; // axios instance for API calls
 import { isAuthenticated } from "../utils/auth"; // checks if token exists
 import { DndContext } from "@dnd-kit/core"; // drag-and-drop context
 import JobColumn from "../components/JobColumn"; // column component for each status
+import LoadingSpinner from "../components/LoadingSpinner";
 
 const Dashboard = () => {
   // ---------------- STATE ----------------
   const [jobs, setJobs] = useState([]); // all jobs from backend
   const [error, setError] = useState(""); // global error message
+  const [isLoading, setIsLoading] = useState(true);
   const [showForm, setShowForm] = useState(false); // controls modal visibility
 
   // form fields
@@ -38,6 +40,8 @@ const Dashboard = () => {
 
     const fetchJobs = async () => {
       try {
+        setIsLoading(true);
+        setError("");
         const res = await API.get("/jobs", {
           headers: {
             Authorization: `Bearer ${token}`, // send JWT to backend
@@ -54,6 +58,8 @@ const Dashboard = () => {
         } else {
           setError("Error loading Jobs");
         }
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -65,6 +71,7 @@ const Dashboard = () => {
     e.preventDefault(); // prevent full page reload
 
     try {
+      setError("");
       const salaryPayload = {};
       if (minSalary !== "") {
         salaryPayload.min = Number(minSalary); // convert to number
@@ -108,7 +115,7 @@ const Dashboard = () => {
       setShowForm(false);
     } catch (err) {
       console.error("Failed to add job:", err);
-      setError("Failed to add job");
+      setError("Failed to add job. Check the required fields and try again.");
     }
   };
 
@@ -123,6 +130,7 @@ const Dashboard = () => {
       setJobs((prevJobs) => prevJobs.filter((job) => job._id !== jobId));
     } catch (err) {
       console.error("Delete Failed:", err);
+      setError("Failed to delete job. Please try again.");
     }
   };
 
@@ -189,31 +197,40 @@ const Dashboard = () => {
     }
   });
 
+  const totalJobs = jobs.length;
+  const activeJobs =
+    groupedJobs.Applied.length + groupedJobs.Interview.length + groupedJobs.Offer.length;
+
   // --------------- RENDER ---------------
   return (
     <DndContext onDragEnd={handleDragEnd}>
-      <div className="p-6 max-w-9xl mx-auto dark:bg-gray-900">
+      <div className="mx-auto min-h-[calc(100vh-65px)] max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         {/* top bar */}
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold text-blue-600 dark:text-blue-400">
-            Dashboard
-          </h1>
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-sm font-medium text-blue-600 dark:text-blue-300">
+              Job tracker
+            </p>
+            <h1 className="text-3xl font-bold tracking-tight text-slate-950 dark:text-white">
+              Dashboard
+            </h1>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+              {totalJobs
+                ? `${activeJobs} active opportunities across ${totalJobs} saved jobs`
+                : "Start by saving the roles you want to track."}
+            </p>
+          </div>
 
           <button
             type="button"
             onClick={() => setShowForm(true)} // open the modal
             className="
-              bg-blue-600
-              hover:bg-blue-700
-              dark:bg-blue-500
-              dark:hover:bg-blue-600
-              text-white
-              text-sm
-              font-semibold
-              px-4
-              py-2
-              rounded-lg
-              shadow-md
+              inline-flex items-center justify-center
+              rounded-lg bg-blue-600 px-4 py-2.5
+              text-sm font-semibold text-white shadow-sm
+              transition hover:bg-blue-700
+              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+              dark:bg-blue-500 dark:hover:bg-blue-400 dark:focus:ring-offset-slate-950
             "
           >
             + Add job
@@ -222,40 +239,47 @@ const Dashboard = () => {
 
         {/* error message */}
         {error && (
-          <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
+          <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-200">
+            {error}
+          </p>
         )}
 
-        {/* Kanban columns */}
-        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2">
-          <JobColumn
-            title="Applied"
-            status="Applied"
-            jobs={groupedJobs.Applied}
-            onDelete={deleteJob}
-            onStatusChange={updateStatus}
-          />
-          <JobColumn
-            title="Interview"
-            status="Interview"
-            jobs={groupedJobs.Interview}
-            onDelete={deleteJob}
-            onStatusChange={updateStatus}
-          />
-          <JobColumn
-            title="Offer"
-            status="Offer"
-            jobs={groupedJobs.Offer}
-            onDelete={deleteJob}
-            onStatusChange={updateStatus}
-          />
-          <JobColumn
-            title="Rejected"
-            status="Rejected"
-            jobs={groupedJobs.Rejected}
-            onDelete={deleteJob}
-            onStatusChange={updateStatus}
-          />
-        </div>
+        {isLoading ? (
+          <div className="flex min-h-[320px] items-center justify-center rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+            <LoadingSpinner size="md" text="Loading jobs..." />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <JobColumn
+              title="Applied"
+              status="Applied"
+              jobs={groupedJobs.Applied}
+              onDelete={deleteJob}
+              onStatusChange={updateStatus}
+            />
+            <JobColumn
+              title="Interview"
+              status="Interview"
+              jobs={groupedJobs.Interview}
+              onDelete={deleteJob}
+              onStatusChange={updateStatus}
+            />
+            <JobColumn
+              title="Offer"
+              status="Offer"
+              jobs={groupedJobs.Offer}
+              onDelete={deleteJob}
+              onStatusChange={updateStatus}
+            />
+            <JobColumn
+              title="Rejected"
+              status="Rejected"
+              jobs={groupedJobs.Rejected}
+              onDelete={deleteJob}
+              onStatusChange={updateStatus}
+            />
+          </div>
+        )}
       </div>
 
       {/* modal: Add New Job */}
@@ -264,15 +288,22 @@ const Dashboard = () => {
           className="
             fixed inset-0 z-50
             flex items-center justify-center
-            bg-black/40
+            overflow-y-auto
+            bg-slate-950/50
+            px-4 py-6
+            backdrop-blur-sm
           "
         >
           <div
             className="
               relative
               w-full max-w-lg
-              bg-white dark:bg-gray-800
+              max-h-[calc(100vh-3rem)]
+              overflow-y-auto
               rounded-xl
+              border border-slate-200
+              bg-white dark:bg-slate-900
+              dark:border-slate-800
               shadow-2xl
               p-6 sm:p-8
             "
@@ -280,21 +311,31 @@ const Dashboard = () => {
             {/* close button */}
             <button
               type="button"
+              aria-label="Close add job form"
               onClick={() => setShowForm(false)}
               className="
                 absolute
                 right-3 top-3
-                text-gray-400
-                hover:text-gray-600
+                rounded-md
+                px-2 py-1
                 text-sm
+                font-semibold
+                text-slate-400
+                hover:bg-slate-100
+                hover:text-slate-700
+                dark:hover:bg-slate-800
+                dark:hover:text-slate-200
               "
             >
               X
             </button>
 
-            <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">
+            <h2 className="mb-1 text-xl font-semibold text-slate-950 dark:text-gray-100">
               Add New Job
             </h2>
+            <p className="mb-5 text-sm text-slate-500 dark:text-slate-400">
+              Save a role to your pipeline and update it as you move forward.
+            </p>
 
             {/* form */}
             <form onSubmit={handleAddJob} className="space-y-4">
@@ -308,11 +349,13 @@ const Dashboard = () => {
                 className="
                   w-full
                   border
-                  dark:border-gray-600
-                  dark:bg-gray-700
+                  border-slate-300
+                  dark:border-slate-700
+                  dark:bg-slate-950
                   dark:text-white
                   px-4 py-2
-                  rounded
+                  rounded-lg
+                  focus:outline-none focus:ring-2 focus:ring-blue-500
                 "
               />
 
@@ -326,11 +369,13 @@ const Dashboard = () => {
                 className="
                   w-full
                   border
-                  dark:border-gray-600
-                  dark:bg-gray-700
+                  border-slate-300
+                  dark:border-slate-700
+                  dark:bg-slate-950
                   dark:text-white
                   px-4 py-2
-                  rounded
+                  rounded-lg
+                  focus:outline-none focus:ring-2 focus:ring-blue-500
                 "
               />
 
@@ -343,11 +388,13 @@ const Dashboard = () => {
                 className="
                   w-full
                   border
-                  dark:border-gray-600
-                  dark:bg-gray-700
+                  border-slate-300
+                  dark:border-slate-700
+                  dark:bg-slate-950
                   dark:text-white
                   px-4 py-2
-                  rounded
+                  rounded-lg
+                  focus:outline-none focus:ring-2 focus:ring-blue-500
                 "
               />
 
@@ -362,11 +409,13 @@ const Dashboard = () => {
                     className="
                       w-full
                       border
-                      dark:border-gray-600
-                      dark:bg-gray-700
+                      border-slate-300
+                      dark:border-slate-700
+                      dark:bg-slate-950
                       dark:text-white
                       px-4 py-2
-                      rounded
+                      rounded-lg
+                      focus:outline-none focus:ring-2 focus:ring-blue-500
                     "
                   />
                 </div>
@@ -380,11 +429,13 @@ const Dashboard = () => {
                     className="
                       w-full
                       border
-                      dark:border-gray-600
-                      dark:bg-gray-700
+                      border-slate-300
+                      dark:border-slate-700
+                      dark:bg-slate-950
                       dark:text-white
                       px-4 py-2
-                      rounded
+                      rounded-lg
+                      focus:outline-none focus:ring-2 focus:ring-blue-500
                     "
                   />
                 </div>
@@ -397,11 +448,13 @@ const Dashboard = () => {
                 className="
                   w-full
                   border
-                  dark:border-gray-600
-                  dark:bg-gray-700
+                  border-slate-300
+                  dark:border-slate-700
+                  dark:bg-slate-950
                   dark:text-white
                   px-4 py-2
-                  rounded
+                  rounded-lg
+                  focus:outline-none focus:ring-2 focus:ring-blue-500
                 "
               >
                 <option value="Applied">Applied</option>
@@ -418,11 +471,13 @@ const Dashboard = () => {
                 className="
                   w-full
                   border
-                  dark:border-gray-600
-                  dark:bg-gray-700
+                  border-slate-300
+                  dark:border-slate-700
+                  dark:bg-slate-950
                   dark:text-white
                   px-4 py-2
-                  rounded
+                  rounded-lg
+                  focus:outline-none focus:ring-2 focus:ring-blue-500
                 "
               />
 
@@ -438,6 +493,9 @@ const Dashboard = () => {
                     border border-gray-300
                     text-gray-700
                     hover:bg-gray-50
+                    dark:border-slate-700
+                    dark:text-slate-200
+                    dark:hover:bg-slate-800
                   "
                 >
                   Cancel

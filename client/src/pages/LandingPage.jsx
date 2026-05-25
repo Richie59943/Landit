@@ -140,19 +140,22 @@ const LandingPage = () => {
             <ul
               className="
                 mt-4
+                list-disc
                 space-y-1
+                pl-5
                 text-xs sm:text-sm
                 text-slate-700
                 max-w-md
                 mx-auto md:mx-0
+                text-left
               "
             >
               <li>
-                • Organize applications by status: Applied, Interview, Offer,
+                Organize applications by status: Applied, Interview, Offer,
                 Rejected
               </li>
-              <li>• Quick drag-and-drop to update where each job is</li>
-              <li>• Notes and applied date visible at a glance</li>
+              <li>Quick drag-and-drop to update where each job is</li>
+              <li>Notes and applied date visible at a glance</li>
             </ul>
           </section>
 
