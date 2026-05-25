@@ -12,29 +12,37 @@ const JobColumn = ({ title, status, jobs, onDelete, onStatusChange }) => {
     <div
       ref={setNodeRef}
       className={`
-        flex-1 rounded-lg p-4 min-h-[250px] transition
+        min-h-[300px] rounded-xl border p-3 transition sm:p-4
         ${
           isOver
-            ? "bg-indigo-50 dark:bg-indigo-900/30"
-            : "bg-gray-100 dark:bg-gray-900"
+            ? "border-blue-300 bg-blue-50 shadow-sm dark:border-blue-700 dark:bg-blue-950/40"
+            : "border-slate-200 bg-slate-100/80 dark:border-slate-800 dark:bg-slate-900"
         }
       `}
     >
-      <h2 className="text-lg font-semibold mb-4 dark:text-white flex items-center justify-between">
+      <h2 className="mb-4 flex items-center justify-between text-sm font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-300">
         <span>{title}</span>
-        <span className="text-xs bg-gray-200 dark:bg-gray-700 px-2 py-0.5 rounded-full">
+        <span className="rounded-full bg-white px-2 py-0.5 text-xs font-bold text-slate-700 shadow-sm dark:bg-slate-800 dark:text-slate-200">
           {jobs.length}
         </span>
       </h2>
 
-      {jobs.map((job) => (
-        <JobCard
-          key={job._id}
-          job={job}
-          onDelete={onDelete}
-          onStatusChange={onStatusChange}
-        />
-      ))}
+      <div className="space-y-3">
+        {jobs.map((job) => (
+          <JobCard
+            key={job._id}
+            job={job}
+            onDelete={onDelete}
+            onStatusChange={onStatusChange}
+          />
+        ))}
+
+        {jobs.length === 0 && (
+          <div className="rounded-lg border border-dashed border-slate-300 bg-white/70 px-4 py-6 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-950/40 dark:text-slate-400">
+            No jobs here yet.
+          </div>
+        )}
+      </div>
     </div>
   );
 };

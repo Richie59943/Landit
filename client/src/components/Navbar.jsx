@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { isAuthenticated } from "../utils/auth";
-import { ThemeContext } from "../context/ThemeContext";
+import { ThemeContext } from "../context/theme";
 
 const Navbar = () => {
   const { darkMode, setDarkMode } = useContext(ThemeContext); //gets the dark mode state
@@ -15,7 +15,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 px-4 py-3 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-950/90 sm:px-6">
+    <nav className="sticky top-0 z-40 flex items-center justify-between border-b border-slate-200 bg-white/90 px-4 py-3 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-950/90 sm:px-6">
       {/* App logo/title */}
       <Link
         to="/"
