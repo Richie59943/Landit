@@ -57,7 +57,7 @@ const AppContent = () => {
 
   return (
     // Outer wrapper that sets the global background and text colors
-    <div className="min-h-screen bg-gray-100 text-black dark:bg-gray-900 dark:text-white">
+    <div className="min-h-screen bg-slate-50 text-slate-950 transition-colors dark:bg-slate-950 dark:text-slate-100">
       {/* Conditionally render the Navbar only if showNavbar is true */}
       {showNavbar && <Navbar />}
 

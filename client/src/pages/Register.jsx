@@ -52,6 +52,8 @@ const Register = () => {
         flex items-center justify-center      /* center card on screen */
         bg-gray-50                            /* soft page background */
         text-gray-900
+        dark:bg-slate-950
+        dark:text-slate-100
       "
     >
       {/* Outer wrapper so we can put a subtle grid behind the card */}
@@ -61,9 +63,11 @@ const Register = () => {
           className="
             relative                            /* above grid background */
             bg-white
+            dark:bg-slate-900
             rounded-3xl
             shadow-xl
             border border-gray-100
+            dark:border-slate-800
             px-6 sm:px-8 py-8 sm:py-10
           "
         >
@@ -73,7 +77,7 @@ const Register = () => {
           <h1 className="text-2xl sm:text-3xl font-bold text-center mb-1">
             Create an Account!
           </h1>
-          <p className="text-sm text-gray-500 text-center mb-6">
+          <p className="text-sm text-gray-500 text-center mb-6 dark:text-slate-400">
             Please enter your details.
           </p>
 
@@ -81,7 +85,7 @@ const Register = () => {
           <form onSubmit={handleRegister} className="space-y-4">
             {/* Email field */}
             <div className="space-y-1">
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-gray-700 dark:text-slate-200">
                 Email
               </label>
               <input
@@ -94,6 +98,9 @@ const Register = () => {
                   w-full
                   rounded-lg
                   border border-gray-300
+                  dark:border-slate-700
+                  dark:bg-slate-950
+                  dark:text-slate-100
                   px-3 py-2.5
                   text-sm
                   focus:outline-none
@@ -105,7 +112,7 @@ const Register = () => {
 
             {/* Password field */}
             <div className="space-y-1">
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-gray-700 dark:text-slate-200">
                 Password
               </label>
               <input
@@ -118,6 +125,9 @@ const Register = () => {
                   w-full
                   rounded-lg
                   border border-gray-300
+                  dark:border-slate-700
+                  dark:bg-slate-950
+                  dark:text-slate-100
                   px-3 py-2.5
                   text-sm
                   focus:outline-none
@@ -129,7 +139,7 @@ const Register = () => {
 
             {/* Remember + forgot password row */}
             <div className="flex items-center justify-between text-xs sm:text-sm">
-              <label className="flex items-center gap-2 text-gray-600">
+              <label className="flex items-center gap-2 text-gray-600 dark:text-slate-300">
                 <input
                   type="checkbox"
                   checked={remember}
@@ -211,7 +221,11 @@ const Register = () => {
                 gap-2
                 text-sm font-medium
                 bg-white
+                dark:bg-slate-950
+                dark:text-slate-100
+                dark:border-slate-700
                 hover:bg-gray-50
+                dark:hover:bg-slate-900
               "
               onClick={() => {
                 console.log("Google sign in clicked");
@@ -227,7 +241,7 @@ const Register = () => {
           </form>
 
           {/* Footer text below form */}
-          <p className="mt-5 text-center text-xs sm:text-sm text-gray-500">
+          <p className="mt-5 text-center text-xs sm:text-sm text-gray-500 dark:text-slate-400">
             Already have an account?{" "}
             <button
               type="button"
