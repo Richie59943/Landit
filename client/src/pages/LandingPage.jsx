@@ -20,13 +20,14 @@ const LandingPage = () => {
       <div
         className="
           relative z-10
-          px-4 sm:px-6 lg:px-8         /* responsive side padding */
+          mx-auto w-full max-w-[1680px]
+          px-4 sm:px-6 lg:px-10 2xl:px-14         /* responsive side padding */
           min-h-screen                 /* fill viewport height */
           flex flex-col                /* column layout: header on top, hero below */
         "
       >
         {/* Top header bar with brand + auth links */}
-        <header className="flex items-center justify-between py-4 sm:py-6">
+        <header className="flex items-center justify-between py-4 sm:py-6 xl:py-8">
           <span className="text-xl sm:text-2xl font-bold tracking-tight">
             Landit
           </span>
@@ -60,22 +61,22 @@ const LandingPage = () => {
             flex-1
             flex flex-col md:flex-row
             items-center justify-center      /* vertical + horizontal centering */
-            gap-10 md:gap-16
-            pb-10
-            max-w-6xl mx-auto               /* limit width and center */
+            gap-10 md:gap-16 xl:gap-24 2xl:gap-32
+            pb-10 xl:pb-14
+            w-full max-w-[1500px] mx-auto               /* limit width and center */
           "
         >
           {/* Left side: text content */}
           <section
             className="
-              w-full md:w-1/2              /* full width on mobile, half on desktop */
+              w-full md:w-[52%] xl:w-[56%]              /* full width on mobile, wider on desktop */
               space-y-5
               text-center md:text-left     /* center on small screens, left on bigger */
             "
           >
             <h1
               className="
-                text-3xl sm:text-4xl md:text-5xl
+                text-3xl sm:text-4xl md:text-5xl xl:text-6xl 2xl:text-7xl
                 font-bold
                 leading-tight
               "
@@ -88,9 +89,9 @@ const LandingPage = () => {
 
             <p
               className="
-                text-sm sm:text-base
+                text-sm sm:text-base xl:text-lg
                 text-slate-700
-                max-w-xl
+                max-w-2xl
                 mx-auto md:mx-0          /* center paragraph on mobile only */
               "
             >
@@ -106,7 +107,7 @@ const LandingPage = () => {
                 items-stretch sm:items-center
                 gap-3 sm:gap-4
                 pt-2
-                max-w-md
+                max-w-md xl:max-w-lg
                 mx-auto md:mx-0
               "
             >
@@ -116,7 +117,7 @@ const LandingPage = () => {
                   w-full sm:w-auto                   /* full-width button on phone */
                   bg-sky-500 hover:bg-sky-600
                   text-white text-sm font-semibold
-                  px-5 py-2.5
+                  px-5 py-2.5 xl:px-6 xl:py-3
                   rounded-lg
                   shadow-lg shadow-sky-500/30
                   text-center
@@ -169,12 +170,12 @@ const LandingPage = () => {
           >
             <div
               className="
-                w-full max-w-sm
+                w-full max-w-sm xl:max-w-md
                 bg-white/75
                 backdrop-blur-xl
                 border border-white/40
                 rounded-2xl
-                p-4 sm:p-5
+                p-4 sm:p-5 xl:p-6
                 shadow-xl
               "
             >

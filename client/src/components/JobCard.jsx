@@ -106,14 +106,14 @@ const JobCard = ({ job, onDelete, onStatusChange }) => {
       style={style} // position based on drag
       {...listeners} // pointer listeners for drag
       {...attributes} // aria attributes etc.
-      className={`cursor-grab rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md active:cursor-grabbing dark:border-slate-800 dark:bg-slate-950
+      className={`cursor-grab rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md active:cursor-grabbing dark:border-slate-800 dark:bg-slate-950 2xl:p-5
         ${isDragging ? "opacity-70 ring-2 ring-blue-400" : ""}`}
     >
       {/* top row: position + company + status pill */}
       <div className="mb-3 flex items-start justify-between gap-3">
         <div className="min-w-0">
           {/* job title */}
-          <h3 className="truncate text-base font-bold text-slate-950 dark:text-white">
+          <h3 className="truncate text-base font-bold text-slate-950 dark:text-white 2xl:text-lg">
             {job.position}
           </h3>
 
@@ -161,7 +161,7 @@ const JobCard = ({ job, onDelete, onStatusChange }) => {
 
       {/* notes */}
       {job.notes && (
-        <p className="mb-3 line-clamp-3 text-sm text-slate-700 dark:text-slate-300">
+        <p className="mb-3 line-clamp-3 text-sm leading-6 text-slate-700 dark:text-slate-300">
           {job.notes}
         </p>
       )}

@@ -199,42 +199,90 @@ const Dashboard = () => {
 
   const totalJobs = jobs.length;
   const activeJobs =
-    groupedJobs.Applied.length + groupedJobs.Interview.length + groupedJobs.Offer.length;
+    groupedJobs.Applied.length +
+    groupedJobs.Interview.length +
+    groupedJobs.Offer.length;
+  const interviewRate = totalJobs
+    ? Math.round((groupedJobs.Interview.length / totalJobs) * 100)
+    : 0;
 
   // --------------- RENDER ---------------
   return (
     <DndContext onDragEnd={handleDragEnd}>
-      <div className="mx-auto min-h-[calc(100vh-65px)] max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mx-auto min-h-[calc(100vh-65px)] w-full max-w-[1800px] px-4 py-6 sm:px-6 lg:px-8 xl:px-10 2xl:px-12">
         {/* top bar */}
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-sm font-medium text-blue-600 dark:text-blue-300">
-              Job tracker
-            </p>
-            <h1 className="text-3xl font-bold tracking-tight text-slate-950 dark:text-white">
-              Dashboard
-            </h1>
-            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-              {totalJobs
-                ? `${activeJobs} active opportunities across ${totalJobs} saved jobs`
-                : "Start by saving the roles you want to track."}
-            </p>
+        <div className="mb-8 rounded-2xl border border-slate-200 bg-white px-4 py-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between">
+            <div className="max-w-3xl">
+              <p className="text-sm font-medium text-blue-600 dark:text-blue-300">
+                Job tracker
+              </p>
+              <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-950 dark:text-white sm:text-4xl">
+                Dashboard
+              </h1>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-400 sm:text-base">
+                {totalJobs
+                  ? `${activeJobs} active opportunities across ${totalJobs} saved jobs`
+                  : "Start by saving the roles you want to track."}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:min-w-[620px]">
+              <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-800 dark:bg-slate-950">
+                <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  Saved
+                </p>
+                <p className="mt-1 text-2xl font-bold text-slate-950 dark:text-white">
+                  {totalJobs}
+                </p>
+              </div>
+              <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-800 dark:bg-slate-950">
+                <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  Active
+                </p>
+                <p className="mt-1 text-2xl font-bold text-slate-950 dark:text-white">
+                  {activeJobs}
+                </p>
+              </div>
+              <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-800 dark:bg-slate-950">
+                <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  Interviews
+                </p>
+                <p className="mt-1 text-2xl font-bold text-slate-950 dark:text-white">
+                  {groupedJobs.Interview.length}
+                </p>
+              </div>
+              <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-800 dark:bg-slate-950">
+                <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  Rate
+                </p>
+                <p className="mt-1 text-2xl font-bold text-slate-950 dark:text-white">
+                  {interviewRate}%
+                </p>
+              </div>
+            </div>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setShowForm(true)} // open the modal
-            className="
-              inline-flex items-center justify-center
-              rounded-lg bg-blue-600 px-4 py-2.5
-              text-sm font-semibold text-white shadow-sm
-              transition hover:bg-blue-700
-              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-              dark:bg-blue-500 dark:hover:bg-blue-400 dark:focus:ring-offset-slate-950
-            "
-          >
-            + Add job
-          </button>
+          <div className="mt-6 flex flex-col gap-3 border-t border-slate-100 pt-5 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Drag cards between columns or update status from each card.
+            </p>
+            <button
+              type="button"
+              onClick={() => setShowForm(true)} // open the modal
+              className="
+                inline-flex w-full items-center justify-center
+                rounded-lg bg-blue-600 px-4 py-2.5
+                text-sm font-semibold text-white shadow-sm
+                transition hover:bg-blue-700
+                focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+                dark:bg-blue-500 dark:hover:bg-blue-400 dark:focus:ring-offset-slate-950
+                sm:w-auto
+              "
+            >
+              + Add job
+            </button>
+          </div>
         </div>
 
         {/* error message */}
@@ -249,7 +297,7 @@ const Dashboard = () => {
             <LoadingSpinner size="md" text="Loading jobs..." />
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4 2xl:gap-5">
             <JobColumn
               title="Applied"
               status="Applied"

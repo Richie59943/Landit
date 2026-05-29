@@ -12,7 +12,7 @@ const JobColumn = ({ title, status, jobs, onDelete, onStatusChange }) => {
     <div
       ref={setNodeRef}
       className={`
-        min-h-[300px] rounded-xl border p-3 transition sm:p-4
+        min-h-[300px] rounded-xl border p-3 transition sm:p-4 2xl:min-h-[520px] 2xl:p-5
         ${
           isOver
             ? "border-blue-300 bg-blue-50 shadow-sm dark:border-blue-700 dark:bg-blue-950/40"
@@ -27,7 +27,7 @@ const JobColumn = ({ title, status, jobs, onDelete, onStatusChange }) => {
         </span>
       </h2>
 
-      <div className="space-y-3">
+      <div className="space-y-3 2xl:space-y-4">
         {jobs.map((job) => (
           <JobCard
             key={job._id}
