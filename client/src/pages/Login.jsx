@@ -1,6 +1,6 @@
 // src/pages/Login.jsx
 import React, { useEffect, useState } from "react"; // React + hooks
-import { useNavigate } from "react-router-dom"; // navigation after login
+import { Link, useNavigate } from "react-router-dom"; // navigation after login
 import API from "../utils/api"; // axios instance
 import { isAuthenticated } from "../utils/auth"; // check if already logged in
 import LoadingSpinner from "../components/LoadingSpinner"; // loading spinner component
@@ -153,6 +153,12 @@ const Login = () => {
                 />
                 <span>Remember for 30 days</span>
               </label>
+              <Link
+                to="/forgot-password"
+                className="font-medium text-sky-500 hover:text-sky-700"
+              >
+                Forgot password?
+              </Link>
             </div>
 
             {/* Error message (if any) */}

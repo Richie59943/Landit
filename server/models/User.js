@@ -1,4 +1,4 @@
-const mongoose = require('mongoose'); // Import Mongoose
+const mongoose = require("mongoose"); // Import Mongoose
 
 //defining the schema
 //for a user
@@ -17,9 +17,15 @@ const userSchema = new mongoose.Schema({
     createdAt: {
         type: Date,
         default: Date.now
+    },
+    resetPasswordToken: {
+        type: String
+    },
+    resetPasswordExpires: {
+        type: Date
     }
 });
 
 
 //Export the model to use it elssewhere
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model("User", userSchema);

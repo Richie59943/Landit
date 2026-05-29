@@ -1,6 +1,10 @@
 const User = require("../models/User"); // Import the User model
 const bcrypt = require("bcryptjs"); // Import bcrypt for password hashing
 const jwt = require("jsonwebtoken"); // Import jwt for token generation
+const crypto = require("crypto");
+
+const getClientUrl = () =>
+  (process.env.CLIENT_URL || "http://localhost:5173").replace(/\/$/, "");
 
 const registerUser = async (req, res) => {
   try {
@@ -62,4 +66,78 @@ const loginUser = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, loginUser }; //. export both function
+const requestPasswordReset = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+
+    const genericMessage =
+      "If an account exists for that email, a password reset link will be available shortly.";
+
+    if (!user) {
+      return res.status(200).json({ message: genericMessage });
+    }
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    user.resetPasswordToken = crypto
+      .createHash("sha256")
+      .update(resetToken)
+      .digest("hex");
+    user.resetPasswordExpires = Date.now() + 60 * 60 * 1000;
+    await user.save();
+
+    const resetUrl = `${getClientUrl()}/reset-password/${resetToken}`;
+
+    if (process.env.NODE_ENV !== "production") {
+      console.log(`Password reset link for ${email}: ${resetUrl}`);
+      return res.status(200).json({ message: genericMessage, resetUrl });
+    }
+
+    res.status(200).json({ message: genericMessage });
+  } catch (error) {
+    console.error("Password reset request error:", error);
+    res.status(500).json({ message: "Error requesting password reset" });
+  }
+};
+
+const resetPassword = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    if (!password || password.length < 6) {
+      return res
+        .status(400)
+        .json({ message: "Password must be at least 6 characters" });
+    }
+
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+    const user = await User.findOne({
+      resetPasswordToken: hashedToken,
+      resetPasswordExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res
+        .status(400)
+        .json({ message: "Password reset link is invalid or expired" });
+    }
+
+    user.password = await bcrypt.hash(password, 10);
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+
+    res.status(200).json({ message: "Password reset successfully" });
+  } catch (error) {
+    console.error("Password reset error:", error);
+    res.status(500).json({ message: "Error resetting password" });
+  }
+};
+
+module.exports = {
+  registerUser,
+  loginUser,
+  requestPasswordReset,
+  resetPassword,
+}; //. export both function
