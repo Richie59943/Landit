@@ -97,7 +97,12 @@ const JobCard = ({ job, onDelete, onStatusChange }) => {
   // delete handler that also cancels drag
   const handleDelete = (e) => {
     e.stopPropagation(); // avoid drag on click
-    onDelete(job._id);
+    const confirmed = window.confirm(
+      `Delete ${job.position} at ${job.company}?`
+    );
+    if (confirmed) {
+      onDelete(job._id);
+    }
   };
 
   return (
@@ -198,7 +203,7 @@ const JobCard = ({ job, onDelete, onStatusChange }) => {
             dark:text-blue-300 dark:hover:text-blue-200
           "
         >
-          View job posting
+          Open job posting
         </a>
       )}
 

@@ -12,6 +12,7 @@ const Dashboard = () => {
   const [jobs, setJobs] = useState([]); // all jobs from backend
   const [error, setError] = useState(""); // global error message
   const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [showForm, setShowForm] = useState(false); // controls modal visibility
 
   // form fields
@@ -72,12 +73,22 @@ const Dashboard = () => {
 
     try {
       setError("");
+      setIsSaving(true);
       const salaryPayload = {};
       if (minSalary !== "") {
         salaryPayload.min = Number(minSalary); // convert to number
       }
       if (maxSalary !== "") {
         salaryPayload.max = Number(maxSalary); // convert to number
+      }
+
+      if (
+        typeof salaryPayload.min === "number" &&
+        typeof salaryPayload.max === "number" &&
+        salaryPayload.min > salaryPayload.max
+      ) {
+        setError("Minimum salary cannot be higher than maximum salary.");
+        return;
       }
 
       // send all job data to backend
@@ -116,6 +127,8 @@ const Dashboard = () => {
     } catch (err) {
       console.error("Failed to add job:", err);
       setError("Failed to add job. Check the required fields and try again.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -287,9 +300,17 @@ const Dashboard = () => {
 
         {/* error message */}
         {error && (
-          <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-200">
-            {error}
-          </p>
+          <div className="mb-4 flex items-start justify-between gap-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-200">
+            <p>{error}</p>
+            <button
+              type="button"
+              onClick={() => setError("")}
+              className="rounded px-1.5 font-semibold hover:bg-red-100 dark:hover:bg-red-900/50"
+              aria-label="Dismiss error"
+            >
+              X
+            </button>
+          </div>
         )}
 
         {isLoading ? (
@@ -297,36 +318,45 @@ const Dashboard = () => {
             <LoadingSpinner size="md" text="Loading jobs..." />
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4 2xl:gap-5">
-            <JobColumn
-              title="Applied"
-              status="Applied"
-              jobs={groupedJobs.Applied}
-              onDelete={deleteJob}
-              onStatusChange={updateStatus}
-            />
-            <JobColumn
-              title="Interview"
-              status="Interview"
-              jobs={groupedJobs.Interview}
-              onDelete={deleteJob}
-              onStatusChange={updateStatus}
-            />
-            <JobColumn
-              title="Offer"
-              status="Offer"
-              jobs={groupedJobs.Offer}
-              onDelete={deleteJob}
-              onStatusChange={updateStatus}
-            />
-            <JobColumn
-              title="Rejected"
-              status="Rejected"
-              jobs={groupedJobs.Rejected}
-              onDelete={deleteJob}
-              onStatusChange={updateStatus}
-            />
-          </div>
+          <>
+            {totalJobs === 0 && (
+              <div className="mb-5 rounded-xl border border-dashed border-blue-300 bg-blue-50 px-5 py-4 text-sm text-blue-800 dark:border-blue-800 dark:bg-blue-950/40 dark:text-blue-200">
+                Your board is empty. Add your first role to start tracking
+                applications, interviews, and offers.
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4 2xl:gap-5">
+              <JobColumn
+                title="Applied"
+                status="Applied"
+                jobs={groupedJobs.Applied}
+                onDelete={deleteJob}
+                onStatusChange={updateStatus}
+              />
+              <JobColumn
+                title="Interview"
+                status="Interview"
+                jobs={groupedJobs.Interview}
+                onDelete={deleteJob}
+                onStatusChange={updateStatus}
+              />
+              <JobColumn
+                title="Offer"
+                status="Offer"
+                jobs={groupedJobs.Offer}
+                onDelete={deleteJob}
+                onStatusChange={updateStatus}
+              />
+              <JobColumn
+                title="Rejected"
+                status="Rejected"
+                jobs={groupedJobs.Rejected}
+                onDelete={deleteJob}
+                onStatusChange={updateStatus}
+              />
+            </div>
+          </>
         )}
       </div>
 
@@ -429,7 +459,7 @@ const Dashboard = () => {
 
               {/* job link */}
               <input
-                type="text"
+                type="url"
                 value={joblink}
                 onChange={(e) => setJoblink(e.target.value)}
                 placeholder="Job Link (optional)"
@@ -451,6 +481,8 @@ const Dashboard = () => {
                 <div className="flex-1">
                   <input
                     type="number"
+                    min="0"
+                    inputMode="numeric"
                     value={minSalary}
                     onChange={(e) => setMinSalary(e.target.value)}
                     placeholder="Min salary"
@@ -471,6 +503,8 @@ const Dashboard = () => {
                 <div className="flex-1">
                   <input
                     type="number"
+                    min="0"
+                    inputMode="numeric"
                     value={maxSalary}
                     onChange={(e) => setMaxSalary(e.target.value)}
                     placeholder="Max salary"
@@ -551,7 +585,9 @@ const Dashboard = () => {
 
                 <button
                   type="submit"
+                  disabled={isSaving}
                   className="
+                    inline-flex items-center justify-center
                     px-4 py-2
                     text-sm
                     rounded-lg
@@ -559,9 +595,15 @@ const Dashboard = () => {
                     hover:bg-blue-700
                     text-white
                     font-semibold
+                    disabled:cursor-not-allowed
+                    disabled:bg-blue-400
                   "
                 >
-                  Save job
+                  {isSaving ? (
+                    <LoadingSpinner text="Saving..." />
+                  ) : (
+                    "Save job"
+                  )}
                 </button>
               </div>
             </form>

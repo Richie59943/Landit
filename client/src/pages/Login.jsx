@@ -27,6 +27,7 @@ const Login = () => {
     e.preventDefault(); // stop page refresh
 
     try {
+      setError("");
       setLoading(true); // start loading
       // send login request to backend
       const res = await API.post("/auth/login", { email, password });
@@ -156,7 +157,7 @@ const Login = () => {
 
             {/* Error message (if any) */}
             {error && (
-              <p className="text-xs text-red-600 bg-red-50 border border-red-100 rounded-md px-3 py-2">
+              <p className="text-xs text-red-600 bg-red-50 border border-red-100 rounded-md px-3 py-2 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-200">
                 {error}
               </p>
             )}
