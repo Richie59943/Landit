@@ -38,8 +38,8 @@ const JobColumn = ({ title, status, jobs, onDelete, onStatusChange }) => {
         ))}
 
         {jobs.length === 0 && (
-          <div className="rounded-lg border border-dashed border-slate-300 bg-white/70 px-4 py-6 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-950/40 dark:text-slate-400">
-            No jobs here yet.
+          <div className="rounded-lg border border-dashed border-slate-300 bg-white/70 px-4 py-6 text-center text-sm leading-6 text-slate-500 dark:border-slate-700 dark:bg-slate-950/40 dark:text-slate-400">
+            Drop a card here or change a job status to move it into {title}.
           </div>
         )}
       </div>

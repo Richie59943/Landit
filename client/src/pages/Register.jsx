@@ -22,6 +22,7 @@ const Register = () => {
     e.preventDefault(); // prevents the pafe from reloading after a subimit
 
     try {
+      setError("");
       setLoading(true); // start loading
       // register the user by sending their email and pass word to the backend
       await API.post("/auth/register", { email, password });
@@ -152,7 +153,7 @@ const Register = () => {
 
             {/* Error message (if any) */}
             {error && (
-              <p className="text-xs text-red-600 bg-red-50 border border-red-100 rounded-md px-3 py-2">
+              <p className="text-xs text-red-600 bg-red-50 border border-red-100 rounded-md px-3 py-2 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-200">
                 {error}
               </p>
             )}
