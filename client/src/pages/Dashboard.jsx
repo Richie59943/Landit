@@ -20,9 +20,13 @@ const Dashboard = () => {
   const [position, setPosition] = useState(""); // position input
   const [status, setStatus] = useState("Applied"); // default status
   const [notes, setNotes] = useState(""); // notes input
+  const [description, setDescription] = useState("");
+  const [location, setLocation] = useState("");
   const [maxSalary, setMaxSalary] = useState(""); // max salary input (string from input)
   const [minSalary, setMinSalary] = useState(""); // min salary input
   const [joblink, setJoblink] = useState(""); // job link input
+  const [parseMessage, setParseMessage] = useState("");
+  const [isParsingLink, setIsParsingLink] = useState(false);
 
   const navigate = useNavigate(); // for navigation
   const token = localStorage.getItem("token"); // JWT from login
@@ -99,6 +103,8 @@ const Dashboard = () => {
           position: position.trim(),
           status,
           notes: notes.trim(),
+          description: description.trim(),
+          location: location.trim(),
           salary:
             Object.keys(salaryPayload).length > 0 ? salaryPayload : undefined,
           joblink: joblink.trim(), // send empty string if user leaves it blank
@@ -118,9 +124,12 @@ const Dashboard = () => {
       setPosition("");
       setStatus("Applied");
       setNotes("");
+      setDescription("");
+      setLocation("");
       setJoblink("");
       setMinSalary("");
       setMaxSalary("");
+      setParseMessage("");
 
       // hide modal
       setShowForm(false);
@@ -129,6 +138,45 @@ const Dashboard = () => {
       setError("Failed to add job. Check the required fields and try again.");
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleParseJobLink = async () => {
+    if (!joblink.trim()) {
+      setParseMessage("Paste a job posting link first.");
+      return;
+    }
+
+    try {
+      setIsParsingLink(true);
+      setParseMessage("");
+      const res = await API.post(
+        "/jobs/parse-link",
+        { url: joblink.trim() },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      const parsedJob = res.data;
+      if (parsedJob.company) setCompany(parsedJob.company);
+      if (parsedJob.position) setPosition(parsedJob.position);
+      if (parsedJob.description) setDescription(parsedJob.description);
+      if (parsedJob.location) setLocation(parsedJob.location);
+      if (parsedJob.joblink) setJoblink(parsedJob.joblink);
+      if (parsedJob.salary?.min) setMinSalary(String(parsedJob.salary.min));
+      if (parsedJob.salary?.max) setMaxSalary(String(parsedJob.salary.max));
+
+      setParseMessage(
+        "Details found. Review and edit anything before saving."
+      );
+    } catch (err) {
+      const message =
+        err.response?.data?.message ||
+        "Could not parse this link. You can still fill the job in manually.";
+      setParseMessage(message);
+    } finally {
+      setIsParsingLink(false);
     }
   };
 
@@ -417,6 +465,52 @@ const Dashboard = () => {
 
             {/* form */}
             <form onSubmit={handleAddJob} className="space-y-4">
+              {/* job link */}
+              <div className="space-y-2">
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <input
+                    type="url"
+                    value={joblink}
+                    onChange={(e) => setJoblink(e.target.value)}
+                    placeholder="Paste job posting link"
+                    className="
+                      w-full
+                      border
+                      border-slate-300
+                      dark:border-slate-700
+                      dark:bg-slate-950
+                      dark:text-white
+                      px-4 py-2
+                      rounded-lg
+                      focus:outline-none focus:ring-2 focus:ring-blue-500
+                    "
+                  />
+                  <button
+                    type="button"
+                    onClick={handleParseJobLink}
+                    disabled={isParsingLink}
+                    className="
+                      inline-flex items-center justify-center
+                      rounded-lg border border-blue-200 px-4 py-2
+                      text-sm font-semibold text-blue-700 transition
+                      hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-70
+                      dark:border-blue-800 dark:text-blue-200 dark:hover:bg-blue-950
+                    "
+                  >
+                    {isParsingLink ? (
+                      <LoadingSpinner text="Parsing..." />
+                    ) : (
+                      "Autofill"
+                    )}
+                  </button>
+                </div>
+                {parseMessage && (
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    {parseMessage}
+                  </p>
+                )}
+              </div>
+
               {/* company */}
               <input
                 type="text"
@@ -457,12 +551,12 @@ const Dashboard = () => {
                 "
               />
 
-              {/* job link */}
+              {/* location */}
               <input
-                type="url"
-                value={joblink}
-                onChange={(e) => setJoblink(e.target.value)}
-                placeholder="Job Link (optional)"
+                type="text"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                placeholder="Location (optional)"
                 className="
                   w-full
                   border
@@ -547,9 +641,29 @@ const Dashboard = () => {
 
               {/* notes */}
               <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Job description (optional)"
+                rows="4"
+                className="
+                  w-full
+                  border
+                  border-slate-300
+                  dark:border-slate-700
+                  dark:bg-slate-950
+                  dark:text-white
+                  px-4 py-2
+                  rounded-lg
+                  focus:outline-none focus:ring-2 focus:ring-blue-500
+                "
+              />
+
+              {/* notes */}
+              <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Notes (optional)"
+                placeholder="Personal notes (optional)"
+                rows="3"
                 className="
                   w-full
                   border
