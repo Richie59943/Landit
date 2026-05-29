@@ -164,6 +164,21 @@ const JobCard = ({ job, onDelete, onStatusChange }) => {
         </p>
       )}
 
+      {job.location && (
+        <p className="mb-2 text-xs font-medium text-slate-600 dark:text-slate-300">
+          Location:{" "}
+          <span className="font-semibold text-slate-950 dark:text-slate-100">
+            {job.location}
+          </span>
+        </p>
+      )}
+
+      {job.description && (
+        <p className="mb-3 line-clamp-3 text-sm leading-6 text-slate-700 dark:text-slate-300">
+          {job.description}
+        </p>
+      )}
+
       {/* notes */}
       {job.notes && (
         <p className="mb-3 line-clamp-3 text-sm leading-6 text-slate-700 dark:text-slate-300">

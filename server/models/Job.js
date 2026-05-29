@@ -23,6 +23,12 @@ const jobSchema = new mongoose.Schema(
     notes: {
       type: String,
     },
+    description: {
+      type: String,
+    },
+    location: {
+      type: String,
+    },
     salary: {
       min: {
         type: Number,
