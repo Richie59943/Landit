@@ -11,6 +11,8 @@ import {
 
 import Login from "./pages/Login"; // Login page
 import Register from "./pages/Register"; // Register page
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard"; // Main app page after login
 import Navbar from "./components/Navbar"; // Top navigation bar
 import LandingPage from "./pages/LandingPage"; // Public landing page
@@ -52,7 +54,9 @@ const AppContent = () => {
   const showNavbar =
     (loggedIn ||
       location.pathname === "/login" ||
-      location.pathname === "/register") &&
+      location.pathname === "/register" ||
+      location.pathname === "/forgot-password" ||
+      location.pathname.startsWith("/reset-password")) &&
     !hideNavbarOn.includes(location.pathname);
 
   return (
@@ -69,6 +73,8 @@ const AppContent = () => {
         {/* Public auth pages */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
 
         {/* Private dashboard route, wrapped in ProtectedRoute */}
         <Route
