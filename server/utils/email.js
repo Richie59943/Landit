@@ -11,6 +11,9 @@ const requiredEmailEnv = [
 const isEmailConfigured = () =>
   requiredEmailEnv.every((key) => Boolean(process.env[key]));
 
+const getMissingEmailConfig = () =>
+  requiredEmailEnv.filter((key) => !process.env[key]);
+
 const createTransporter = () =>
   nodemailer.createTransport({
     host: process.env.SMTP_HOST,
@@ -52,6 +55,7 @@ const sendPasswordResetEmail = async ({ to, resetUrl }) => {
 };
 
 module.exports = {
+  getMissingEmailConfig,
   isEmailConfigured,
   sendPasswordResetEmail,
 };

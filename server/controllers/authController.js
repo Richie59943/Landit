@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs"); // Import bcrypt for password hashing
 const jwt = require("jsonwebtoken"); // Import jwt for token generation
 const crypto = require("crypto");
 const {
+  getMissingEmailConfig,
   isEmailConfigured,
   sendPasswordResetEmail,
 } = require("../utils/email");
@@ -98,8 +99,9 @@ const requestPasswordReset = async (req, res) => {
       console.log(`Password reset link for ${email}: ${resetUrl}`);
       return res.status(200).json({ message: genericMessage, resetUrl });
     } else {
+      const missingEmailConfig = getMissingEmailConfig().join(", ");
       console.error(
-        "Password reset email requested, but SMTP environment variables are not configured."
+        `Password reset email requested, but SMTP environment variables are not configured. Missing: ${missingEmailConfig}`
       );
     }
 
