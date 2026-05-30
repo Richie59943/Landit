@@ -2,6 +2,10 @@ const User = require("../models/User"); // Import the User model
 const bcrypt = require("bcryptjs"); // Import bcrypt for password hashing
 const jwt = require("jsonwebtoken"); // Import jwt for token generation
 const crypto = require("crypto");
+const {
+  isEmailConfigured,
+  sendPasswordResetEmail,
+} = require("../utils/email");
 
 const getClientUrl = () =>
   (process.env.CLIENT_URL || "http://localhost:5173").replace(/\/$/, "");
@@ -88,9 +92,15 @@ const requestPasswordReset = async (req, res) => {
 
     const resetUrl = `${getClientUrl()}/reset-password/${resetToken}`;
 
-    if (process.env.NODE_ENV !== "production") {
+    if (isEmailConfigured()) {
+      await sendPasswordResetEmail({ to: user.email, resetUrl });
+    } else if (process.env.NODE_ENV !== "production") {
       console.log(`Password reset link for ${email}: ${resetUrl}`);
       return res.status(200).json({ message: genericMessage, resetUrl });
+    } else {
+      console.error(
+        "Password reset email requested, but SMTP environment variables are not configured."
+      );
     }
 
     res.status(200).json({ message: genericMessage });
