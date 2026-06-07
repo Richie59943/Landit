@@ -17,6 +17,7 @@ const Dashboard = () => {
 
   // form fields
   const [company, setCompany] = useState(""); // company input
+  const [companyWebsite, setCompanyWebsite] = useState("");
   const [position, setPosition] = useState(""); // position input
   const [status, setStatus] = useState("Applied"); // default status
   const [notes, setNotes] = useState(""); // notes input
@@ -24,8 +25,18 @@ const Dashboard = () => {
   const [location, setLocation] = useState("");
   const [maxSalary, setMaxSalary] = useState(""); // max salary input (string from input)
   const [minSalary, setMinSalary] = useState(""); // min salary input
+  const [salaryText, setSalaryText] = useState("");
+  const [employmentType, setEmploymentType] = useState("");
+  const [workplaceType, setWorkplaceType] = useState("");
+  const [requiredQualifications, setRequiredQualifications] = useState("");
+  const [preferredQualifications, setPreferredQualifications] = useState("");
+  const [skills, setSkills] = useState("");
+  const [sourcePlatform, setSourcePlatform] = useState("");
+  const [postingDate, setPostingDate] = useState("");
+  const [importConfidence, setImportConfidence] = useState(null);
   const [joblink, setJoblink] = useState(""); // job link input
   const [parseMessage, setParseMessage] = useState("");
+  const [parseStatus, setParseStatus] = useState("");
   const [isParsingLink, setIsParsingLink] = useState(false);
 
   const navigate = useNavigate(); // for navigation
@@ -100,6 +111,7 @@ const Dashboard = () => {
         "/jobs",
         {
           company: company.trim(),
+          companyWebsite: companyWebsite.trim(),
           position: position.trim(),
           status,
           notes: notes.trim(),
@@ -107,7 +119,21 @@ const Dashboard = () => {
           location: location.trim(),
           salary:
             Object.keys(salaryPayload).length > 0 ? salaryPayload : undefined,
+          salaryText: salaryText.trim(),
+          employmentType: employmentType.trim(),
+          workplaceType: workplaceType.trim(),
+          requiredQualifications: requiredQualifications.trim(),
+          preferredQualifications: preferredQualifications.trim(),
+          skills: skills
+            .split(",")
+            .map((skill) => skill.trim())
+            .filter(Boolean),
           joblink: joblink.trim(), // send empty string if user leaves it blank
+          applicationUrl: joblink.trim(),
+          sourcePlatform: sourcePlatform.trim(),
+          postingDate: postingDate || undefined,
+          importConfidence:
+            typeof importConfidence === "number" ? importConfidence : undefined,
         },
         {
           headers: {
@@ -121,6 +147,7 @@ const Dashboard = () => {
 
       // reset form fields
       setCompany("");
+      setCompanyWebsite("");
       setPosition("");
       setStatus("Applied");
       setNotes("");
@@ -129,7 +156,17 @@ const Dashboard = () => {
       setJoblink("");
       setMinSalary("");
       setMaxSalary("");
+      setSalaryText("");
+      setEmploymentType("");
+      setWorkplaceType("");
+      setRequiredQualifications("");
+      setPreferredQualifications("");
+      setSkills("");
+      setSourcePlatform("");
+      setPostingDate("");
+      setImportConfidence(null);
       setParseMessage("");
+      setParseStatus("");
 
       // hide modal
       setShowForm(false);
@@ -144,12 +181,14 @@ const Dashboard = () => {
   const handleParseJobLink = async () => {
     if (!joblink.trim()) {
       setParseMessage("Paste a job posting link first.");
+      setParseStatus("error");
       return;
     }
 
     try {
       setIsParsingLink(true);
       setParseMessage("");
+      setParseStatus("");
       const res = await API.post(
         "/jobs/parse-link",
         { url: joblink.trim() },
@@ -160,21 +199,41 @@ const Dashboard = () => {
 
       const parsedJob = res.data;
       if (parsedJob.company) setCompany(parsedJob.company);
+      if (parsedJob.companyWebsite) setCompanyWebsite(parsedJob.companyWebsite);
       if (parsedJob.position) setPosition(parsedJob.position);
       if (parsedJob.description) setDescription(parsedJob.description);
       if (parsedJob.location) setLocation(parsedJob.location);
       if (parsedJob.joblink) setJoblink(parsedJob.joblink);
       if (parsedJob.salary?.min) setMinSalary(String(parsedJob.salary.min));
       if (parsedJob.salary?.max) setMaxSalary(String(parsedJob.salary.max));
+      if (parsedJob.salaryText) setSalaryText(parsedJob.salaryText);
+      if (parsedJob.employmentType) setEmploymentType(parsedJob.employmentType);
+      if (parsedJob.workplaceType) setWorkplaceType(parsedJob.workplaceType);
+      if (parsedJob.requiredQualifications) {
+        setRequiredQualifications(parsedJob.requiredQualifications);
+      }
+      if (parsedJob.preferredQualifications) {
+        setPreferredQualifications(parsedJob.preferredQualifications);
+      }
+      if (parsedJob.skills?.length) setSkills(parsedJob.skills.join(", "));
+      if (parsedJob.sourcePlatform) setSourcePlatform(parsedJob.sourcePlatform);
+      if (parsedJob.postingDate) {
+        setPostingDate(parsedJob.postingDate.slice(0, 10));
+      }
+      if (typeof parsedJob.confidence === "number") {
+        setImportConfidence(parsedJob.confidence);
+      }
 
       setParseMessage(
         "Details found. Review and edit anything before saving."
       );
+      setParseStatus("success");
     } catch (err) {
       const message =
         err.response?.data?.message ||
-        "Could not parse this link. You can still fill the job in manually.";
+        "We couldn't fully extract this job posting. You can still complete the form manually.";
       setParseMessage(message);
+      setParseStatus("error");
     } finally {
       setIsParsingLink(false);
     }
@@ -472,7 +531,7 @@ const Dashboard = () => {
                     type="url"
                     value={joblink}
                     onChange={(e) => setJoblink(e.target.value)}
-                    placeholder="Paste job posting link"
+                    placeholder="Paste Job URL"
                     className="
                       w-full
                       border
@@ -500,14 +559,28 @@ const Dashboard = () => {
                     {isParsingLink ? (
                       <LoadingSpinner text="Parsing..." />
                     ) : (
-                      "Autofill"
+                      "Import Job"
                     )}
                   </button>
                 </div>
                 {parseMessage && (
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    {parseMessage}
-                  </p>
+                  <div
+                    className={`rounded-lg border px-3 py-2 text-xs ${
+                      parseStatus === "success"
+                        ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200"
+                        : "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
+                    }`}
+                  >
+                    <p>{parseMessage}</p>
+                    {sourcePlatform && (
+                      <p className="mt-1 font-semibold">
+                        Source: {sourcePlatform}
+                        {typeof importConfidence === "number"
+                          ? ` · Confidence: ${importConfidence}%`
+                          : ""}
+                      </p>
+                    )}
+                  </div>
                 )}
               </div>
 
@@ -518,6 +591,25 @@ const Dashboard = () => {
                 onChange={(e) => setCompany(e.target.value)}
                 placeholder="Company"
                 required
+                className="
+                  w-full
+                  border
+                  border-slate-300
+                  dark:border-slate-700
+                  dark:bg-slate-950
+                  dark:text-white
+                  px-4 py-2
+                  rounded-lg
+                  focus:outline-none focus:ring-2 focus:ring-blue-500
+                "
+              />
+
+              {/* company website */}
+              <input
+                type="url"
+                value={companyWebsite}
+                onChange={(e) => setCompanyWebsite(e.target.value)}
+                placeholder="Company website (optional)"
                 className="
                   w-full
                   border
@@ -617,6 +709,123 @@ const Dashboard = () => {
                 </div>
               </div>
 
+              <input
+                type="text"
+                value={salaryText}
+                onChange={(e) => setSalaryText(e.target.value)}
+                placeholder="Salary text (optional)"
+                className="
+                  w-full
+                  border
+                  border-slate-300
+                  dark:border-slate-700
+                  dark:bg-slate-950
+                  dark:text-white
+                  px-4 py-2
+                  rounded-lg
+                  focus:outline-none focus:ring-2 focus:ring-blue-500
+                "
+              />
+
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <select
+                  value={employmentType}
+                  onChange={(e) => setEmploymentType(e.target.value)}
+                  className="
+                    w-full
+                    border
+                    border-slate-300
+                    dark:border-slate-700
+                    dark:bg-slate-950
+                    dark:text-white
+                    px-4 py-2
+                    rounded-lg
+                    focus:outline-none focus:ring-2 focus:ring-blue-500
+                  "
+                >
+                  <option value="">Employment type</option>
+                  <option value="Internship">Internship</option>
+                  <option value="Full Time">Full Time</option>
+                  <option value="Part Time">Part Time</option>
+                  <option value="Contract">Contract</option>
+                </select>
+
+                <select
+                  value={workplaceType}
+                  onChange={(e) => setWorkplaceType(e.target.value)}
+                  className="
+                    w-full
+                    border
+                    border-slate-300
+                    dark:border-slate-700
+                    dark:bg-slate-950
+                    dark:text-white
+                    px-4 py-2
+                    rounded-lg
+                    focus:outline-none focus:ring-2 focus:ring-blue-500
+                  "
+                >
+                  <option value="">Workplace type</option>
+                  <option value="Remote">Remote</option>
+                  <option value="Hybrid">Hybrid</option>
+                  <option value="On Site">On Site</option>
+                </select>
+              </div>
+
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <input
+                  type="text"
+                  value={sourcePlatform}
+                  onChange={(e) => setSourcePlatform(e.target.value)}
+                  placeholder="Source platform (optional)"
+                  className="
+                    w-full
+                    border
+                    border-slate-300
+                    dark:border-slate-700
+                    dark:bg-slate-950
+                    dark:text-white
+                    px-4 py-2
+                    rounded-lg
+                    focus:outline-none focus:ring-2 focus:ring-blue-500
+                  "
+                />
+                <input
+                  type="date"
+                  value={postingDate}
+                  onChange={(e) => setPostingDate(e.target.value)}
+                  className="
+                    w-full
+                    border
+                    border-slate-300
+                    dark:border-slate-700
+                    dark:bg-slate-950
+                    dark:text-white
+                    px-4 py-2
+                    rounded-lg
+                    focus:outline-none focus:ring-2 focus:ring-blue-500
+                  "
+                />
+              </div>
+
+              <input
+                type="text"
+                value={skills}
+                onChange={(e) => setSkills(e.target.value)}
+                placeholder="Skills (comma separated)"
+                className="
+                  w-full
+                  border
+                  border-slate-300
+                  dark:border-slate-700
+                  dark:bg-slate-950
+                  dark:text-white
+                  px-4 py-2
+                  rounded-lg
+                  focus:outline-none focus:ring-2 focus:ring-blue-500
+                "
+              />
+
               {/* status */}
               <select
                 value={status}
@@ -645,6 +854,42 @@ const Dashboard = () => {
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Job description (optional)"
                 rows="4"
+                className="
+                  w-full
+                  border
+                  border-slate-300
+                  dark:border-slate-700
+                  dark:bg-slate-950
+                  dark:text-white
+                  px-4 py-2
+                  rounded-lg
+                  focus:outline-none focus:ring-2 focus:ring-blue-500
+                "
+              />
+
+              <textarea
+                value={requiredQualifications}
+                onChange={(e) => setRequiredQualifications(e.target.value)}
+                placeholder="Required qualifications (optional)"
+                rows="3"
+                className="
+                  w-full
+                  border
+                  border-slate-300
+                  dark:border-slate-700
+                  dark:bg-slate-950
+                  dark:text-white
+                  px-4 py-2
+                  rounded-lg
+                  focus:outline-none focus:ring-2 focus:ring-blue-500
+                "
+              />
+
+              <textarea
+                value={preferredQualifications}
+                onChange={(e) => setPreferredQualifications(e.target.value)}
+                placeholder="Preferred qualifications (optional)"
+                rows="3"
                 className="
                   w-full
                   border
