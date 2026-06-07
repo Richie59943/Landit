@@ -12,6 +12,12 @@ const ForgotPassword = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const trimmedEmail = email.trim().toLowerCase();
+
+    if (!trimmedEmail) {
+      setError("Enter the email address for your account.");
+      return;
+    }
 
     try {
       setLoading(true);
@@ -20,7 +26,7 @@ const ForgotPassword = () => {
       setResetUrl("");
 
       const res = await API.post("/auth/forgot-password", {
-        email: email.trim(),
+        email: trimmedEmail,
       });
 
       setMessage(res.data.message);

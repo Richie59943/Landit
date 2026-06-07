@@ -8,11 +8,41 @@ const {
 } = require("../utils/email");
 
 const getClientUrl = () =>
-  (process.env.CLIENT_URL || "http://localhost:5173").replace(/\/$/, "");
+  (
+    process.env.CLIENT_URL ||
+    process.env.FRONTEND_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "") ||
+    "http://localhost:5173"
+  ).replace(/\/$/, "");
+
+const normalizeEmail = (email = "") => email.trim().toLowerCase();
+
+const hashResetToken = (token) =>
+  crypto.createHash("sha256").update(token).digest("hex");
+
+const findUserByResetToken = async (token) => {
+  if (!token) {
+    return { error: "Password reset link is invalid." };
+  }
+
+  const hashedToken = hashResetToken(token);
+  const user = await User.findOne({ resetPasswordToken: hashedToken });
+
+  if (!user) {
+    return { error: "Password reset link is invalid." };
+  }
+
+  if (!user.resetPasswordExpires || user.resetPasswordExpires <= Date.now()) {
+    return { error: "Password reset link has expired." };
+  }
+
+  return { user };
+};
 
 const registerUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { password } = req.body;
+    const email = normalizeEmail(req.body.email);
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });
@@ -44,7 +74,8 @@ const registerUser = async (req, res) => {
 //Login user if exists
 const loginUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { password } = req.body;
+    const email = normalizeEmail(req.body.email);
 
     const user = await User.findOne({ email });
     if (!user) {
@@ -72,7 +103,7 @@ const loginUser = async (req, res) => {
 
 const requestPasswordReset = async (req, res) => {
   try {
-    const { email } = req.body;
+    const email = normalizeEmail(req.body.email);
     const user = await User.findOne({ email });
 
     const genericMessage =
@@ -101,12 +132,30 @@ const requestPasswordReset = async (req, res) => {
       console.error(
         "Password reset email requested, but SMTP environment variables are not configured."
       );
+      return res
+        .status(503)
+        .json({ message: "Password reset email is not configured." });
     }
 
     res.status(200).json({ message: genericMessage });
   } catch (error) {
     console.error("Password reset request error:", error);
     res.status(500).json({ message: "Error requesting password reset" });
+  }
+};
+
+const verifyPasswordResetToken = async (req, res) => {
+  try {
+    const { error } = await findUserByResetToken(req.params.token);
+
+    if (error) {
+      return res.status(400).json({ message: error });
+    }
+
+    res.status(200).json({ message: "Password reset link is valid." });
+  } catch (error) {
+    console.error("Password reset verification error:", error);
+    res.status(500).json({ message: "Error verifying password reset link" });
   }
 };
 
@@ -121,16 +170,10 @@ const resetPassword = async (req, res) => {
         .json({ message: "Password must be at least 6 characters" });
     }
 
-    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
-    const user = await User.findOne({
-      resetPasswordToken: hashedToken,
-      resetPasswordExpires: { $gt: Date.now() },
-    });
+    const { user, error } = await findUserByResetToken(token);
 
-    if (!user) {
-      return res
-        .status(400)
-        .json({ message: "Password reset link is invalid or expired" });
+    if (error) {
+      return res.status(400).json({ message: error });
     }
 
     user.password = await bcrypt.hash(password, 10);
@@ -149,5 +192,6 @@ module.exports = {
   registerUser,
   loginUser,
   requestPasswordReset,
+  verifyPasswordResetToken,
   resetPassword,
 }; //. export both function

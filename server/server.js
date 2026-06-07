@@ -8,10 +8,14 @@ require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 
 // List of allowed frontend URLs that can call this API
 const allowedOrigins = [
+  "http://localhost:5173", // Vite dev (local)
   "http://localhost:5001", // Vite dev (local)
   "https://landitr.vercel.app", // Your main Vercel frontend
   "landitr.vercel.app", // Any extra Vercel preview you want to allow
-];
+  process.env.CLIENT_URL,
+  process.env.FRONTEND_URL,
+  process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "",
+].filter(Boolean);
 
 const authRoutes = require("./routes/auth"); // Imports the auth routes
 
