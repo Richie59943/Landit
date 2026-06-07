@@ -37,6 +37,7 @@ const Dashboard = () => {
   const [joblink, setJoblink] = useState(""); // job link input
   const [parseMessage, setParseMessage] = useState("");
   const [parseStatus, setParseStatus] = useState("");
+  const [importedPreview, setImportedPreview] = useState(null);
   const [isParsingLink, setIsParsingLink] = useState(false);
 
   const navigate = useNavigate(); // for navigation
@@ -165,6 +166,7 @@ const Dashboard = () => {
       setSourcePlatform("");
       setPostingDate("");
       setImportConfidence(null);
+      setImportedPreview(null);
       setParseMessage("");
       setParseStatus("");
 
@@ -182,6 +184,7 @@ const Dashboard = () => {
     if (!joblink.trim()) {
       setParseMessage("Paste a job posting link first.");
       setParseStatus("error");
+      setImportedPreview(null);
       return;
     }
 
@@ -189,6 +192,7 @@ const Dashboard = () => {
       setIsParsingLink(true);
       setParseMessage("");
       setParseStatus("");
+      setImportedPreview(null);
       const res = await API.post(
         "/jobs/parse-link",
         { url: joblink.trim() },
@@ -223,6 +227,7 @@ const Dashboard = () => {
       if (typeof parsedJob.confidence === "number") {
         setImportConfidence(parsedJob.confidence);
       }
+      setImportedPreview(parsedJob);
 
       setParseMessage(
         "Details found. Review and edit anything before saving."
@@ -234,6 +239,7 @@ const Dashboard = () => {
         "We couldn't fully extract this job posting. You can still complete the form manually.";
       setParseMessage(message);
       setParseStatus("error");
+      setImportedPreview(null);
     } finally {
       setIsParsingLink(false);
     }
@@ -325,6 +331,12 @@ const Dashboard = () => {
   const interviewRate = totalJobs
     ? Math.round((groupedJobs.Interview.length / totalJobs) * 100)
     : 0;
+  const confidenceTone =
+    importConfidence >= 80
+      ? "text-emerald-700 bg-emerald-50 ring-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-200 dark:ring-emerald-900"
+      : importConfidence >= 50
+        ? "text-amber-700 bg-amber-50 ring-amber-200 dark:bg-amber-950/40 dark:text-amber-200 dark:ring-amber-900"
+        : "text-slate-700 bg-slate-100 ring-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700";
 
   // --------------- RENDER ---------------
   return (
@@ -482,7 +494,7 @@ const Dashboard = () => {
           <div
             className="
               relative
-              w-full max-w-lg
+              w-full max-w-3xl
               max-h-[calc(100vh-3rem)]
               overflow-y-auto
               rounded-xl
@@ -524,10 +536,31 @@ const Dashboard = () => {
 
             {/* form */}
             <form onSubmit={handleAddJob} className="space-y-4">
-              {/* job link */}
-              <div className="space-y-2">
+              <section className="border-b border-slate-200 pb-5 dark:border-slate-800">
+                <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <h3 className="text-sm font-semibold text-slate-950 dark:text-white">
+                      Import from URL
+                    </h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      LinkedIn, Indeed, Greenhouse, Lever, Workday, Ashby, and public job pages
+                    </p>
+                  </div>
+                  {typeof importConfidence === "number" && (
+                    <span
+                      className={`inline-flex w-fit items-center rounded-full px-3 py-1 text-xs font-semibold ring-1 ${confidenceTone}`}
+                    >
+                      {importConfidence}% confidence
+                    </span>
+                  )}
+                </div>
+
                 <div className="flex flex-col gap-2 sm:flex-row">
+                  <label className="sr-only" htmlFor="job-import-url">
+                    Paste Job URL
+                  </label>
                   <input
+                    id="job-import-url"
                     type="url"
                     value={joblink}
                     onChange={(e) => setJoblink(e.target.value)}
@@ -535,12 +568,14 @@ const Dashboard = () => {
                     className="
                       w-full
                       border
-                      border-slate-300
-                      dark:border-slate-700
+                      border-blue-200
+                      bg-white
+                      dark:border-blue-900
                       dark:bg-slate-950
                       dark:text-white
-                      px-4 py-2
-                      rounded-lg
+                      px-4 py-2.5
+                      rounded-xl
+                      shadow-sm
                       focus:outline-none focus:ring-2 focus:ring-blue-500
                     "
                   />
@@ -549,40 +584,111 @@ const Dashboard = () => {
                     onClick={handleParseJobLink}
                     disabled={isParsingLink}
                     className="
-                      inline-flex items-center justify-center
-                      rounded-lg border border-blue-200 px-4 py-2
-                      text-sm font-semibold text-blue-700 transition
-                      hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-70
-                      dark:border-blue-800 dark:text-blue-200 dark:hover:bg-blue-950
+                      inline-flex min-h-[42px] items-center justify-center
+                      rounded-xl bg-blue-600 px-5 py-2.5
+                      text-sm font-semibold text-white shadow-sm transition
+                      hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-400
+                      dark:bg-blue-500 dark:hover:bg-blue-400
                     "
                   >
                     {isParsingLink ? (
-                      <LoadingSpinner text="Parsing..." />
+                      <LoadingSpinner text="Importing..." />
                     ) : (
                       "Import Job"
                     )}
                   </button>
                 </div>
+
+                {isParsingLink && (
+                  <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-blue-100 dark:bg-blue-950">
+                    <div className="h-full w-2/3 animate-pulse rounded-full bg-blue-500" />
+                  </div>
+                )}
+
                 {parseMessage && (
                   <div
-                    className={`rounded-lg border px-3 py-2 text-xs ${
+                    className={`mt-3 rounded-xl border px-4 py-3 text-sm ${
                       parseStatus === "success"
-                        ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200"
-                        : "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
+                        ? "border-emerald-200 bg-white text-emerald-700 dark:border-emerald-900 dark:bg-slate-950 dark:text-emerald-200"
+                        : "border-amber-200 bg-white text-amber-700 dark:border-amber-900 dark:bg-slate-950 dark:text-amber-200"
                     }`}
                   >
-                    <p>{parseMessage}</p>
+                    <p className="font-medium">{parseMessage}</p>
                     {sourcePlatform && (
-                      <p className="mt-1 font-semibold">
-                        Source: {sourcePlatform}
-                        {typeof importConfidence === "number"
-                          ? ` · Confidence: ${importConfidence}%`
-                          : ""}
+                      <p className="mt-1 text-xs">
+                        Detected source:{" "}
+                        <span className="font-semibold">{sourcePlatform}</span>
                       </p>
                     )}
                   </div>
                 )}
-              </div>
+
+                {importedPreview && (
+                  <div className="mt-4 border-t border-slate-200 pt-4 dark:border-slate-800">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-blue-600 dark:text-blue-300">
+                          Imported preview
+                        </p>
+                        <h4 className="mt-1 truncate text-lg font-bold text-slate-950 dark:text-white">
+                          {importedPreview.position || "Untitled role"}
+                        </h4>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">
+                          {importedPreview.company || "Company not detected"}
+                          {importedPreview.location
+                            ? ` · ${importedPreview.location}`
+                            : ""}
+                        </p>
+                      </div>
+                      {importedPreview.employmentType && (
+                        <span className="w-fit rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                          {importedPreview.employmentType}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="mt-4 grid grid-cols-1 gap-3 text-sm sm:grid-cols-3">
+                      <div className="border-l border-slate-200 pl-3 dark:border-slate-800">
+                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                          Workplace
+                        </p>
+                        <p className="font-semibold text-slate-900 dark:text-slate-100">
+                          {importedPreview.workplaceType || "Not detected"}
+                        </p>
+                      </div>
+                      <div className="border-l border-slate-200 pl-3 dark:border-slate-800">
+                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                          Salary
+                        </p>
+                        <p className="font-semibold text-slate-900 dark:text-slate-100">
+                          {importedPreview.salaryText || "Not detected"}
+                        </p>
+                      </div>
+                      <div className="border-l border-slate-200 pl-3 dark:border-slate-800">
+                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                          Posted
+                        </p>
+                        <p className="font-semibold text-slate-900 dark:text-slate-100">
+                          {importedPreview.postingDate || "Not detected"}
+                        </p>
+                      </div>
+                    </div>
+
+                    {importedPreview.skills?.length > 0 && (
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {importedPreview.skills.slice(0, 8).map((skill) => (
+                          <span
+                            key={skill}
+                            className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-950/60 dark:text-blue-200"
+                          >
+                            {skill}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </section>
 
               {/* company */}
               <input
