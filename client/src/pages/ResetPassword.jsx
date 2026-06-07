@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import API from "../utils/api";
 import LoadingSpinner from "../components/LoadingSpinner";
@@ -10,13 +10,38 @@ const ResetPassword = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [tokenStatus, setTokenStatus] = useState("checking");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const verifyToken = async () => {
+      try {
+        setTokenStatus("checking");
+        setError("");
+        await API.get(`/auth/reset-password/${token}`);
+        setTokenStatus("valid");
+      } catch (err) {
+        setTokenStatus("invalid");
+        setError(
+          err.response?.data?.message ||
+            "Password reset link is invalid or expired."
+        );
+      }
+    };
+
+    verifyToken();
+  }, [token]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters.");
       return;
     }
 
@@ -63,6 +88,7 @@ const ResetPassword = () => {
               placeholder="New password"
               minLength="6"
               required
+              disabled={tokenStatus !== "valid"}
               className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm placeholder:text-gray-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
             />
           </div>
@@ -78,6 +104,7 @@ const ResetPassword = () => {
               placeholder="Confirm password"
               minLength="6"
               required
+              disabled={tokenStatus !== "valid"}
               className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm placeholder:text-gray-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
             />
           </div>
@@ -96,10 +123,12 @@ const ResetPassword = () => {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || tokenStatus !== "valid"}
             className="mt-1 inline-flex w-full items-center justify-center rounded-lg bg-sky-500 py-2.5 text-sm font-semibold text-white shadow-md shadow-sky-300/20 transition-colors hover:bg-sky-700 disabled:cursor-not-allowed disabled:bg-sky-400"
           >
-            {loading ? (
+            {tokenStatus === "checking" ? (
+              <LoadingSpinner text="Checking link..." />
+            ) : loading ? (
               <LoadingSpinner text="Resetting..." />
             ) : (
               "Reset password"
