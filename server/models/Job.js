@@ -12,6 +12,9 @@ const jobSchema = new mongoose.Schema(
       type: String,
       required: true, // company name is required
     },
+    companyWebsite: {
+      type: String,
+    },
     position: {
       type: String,
       required: true, // position title is required
@@ -37,8 +40,42 @@ const jobSchema = new mongoose.Schema(
         type: Number,
       },
     },
+    salaryText: {
+      type: String,
+    },
+    employmentType: {
+      type: String,
+    },
+    workplaceType: {
+      type: String,
+    },
+    requiredQualifications: {
+      type: String,
+    },
+    preferredQualifications: {
+      type: String,
+    },
+    skills: [
+      {
+        type: String,
+      },
+    ],
     joblink: {
       type: String,
+    },
+    applicationUrl: {
+      type: String,
+    },
+    sourcePlatform: {
+      type: String,
+    },
+    postingDate: {
+      type: Date,
+    },
+    importConfidence: {
+      type: Number,
+      min: 0,
+      max: 100,
     },
     dateApplied: {
       type: Date,
