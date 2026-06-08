@@ -87,7 +87,8 @@ const JobCard = ({ job, onDelete, onStatusChange }) => {
     return ""; // both missing or invalid
   };
 
-  const salaryText = formatSalary(job.salary); // precompute once
+  const salaryText = formatSalary(job.salary) || job.salaryText; // precompute once
+  const jobMeta = [job.employmentType, job.workplaceType].filter(Boolean);
 
   // used on elements where we DO NOT want dragging to start
   const stopDrag = (e) => {
@@ -173,6 +174,37 @@ const JobCard = ({ job, onDelete, onStatusChange }) => {
         </p>
       )}
 
+      {(jobMeta.length > 0 || job.sourcePlatform) && (
+        <div className="mb-3 flex flex-wrap gap-2">
+          {jobMeta.map((item) => (
+            <span
+              key={item}
+              className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200"
+            >
+              {item}
+            </span>
+          ))}
+          {job.sourcePlatform && (
+            <span className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-950 dark:text-blue-200">
+              {job.sourcePlatform}
+            </span>
+          )}
+        </div>
+      )}
+
+      {job.skills?.length > 0 && (
+        <div className="mb-3 flex flex-wrap gap-1.5">
+          {job.skills.slice(0, 5).map((skill) => (
+            <span
+              key={skill}
+              className="rounded-md bg-slate-50 px-2 py-1 text-[11px] font-medium text-slate-600 dark:bg-slate-900 dark:text-slate-300"
+            >
+              {skill}
+            </span>
+          ))}
+        </div>
+      )}
+
       {job.description && (
         <p className="mb-3 line-clamp-3 text-sm leading-6 text-slate-700 dark:text-slate-300">
           {job.description}
@@ -202,7 +234,7 @@ const JobCard = ({ job, onDelete, onStatusChange }) => {
       {/* job link (clickable, but does NOT drag) */}
       {job.joblink && (
         <a
-          href={job.joblink}
+          href={job.applicationUrl || job.joblink}
           target="_blank"
           rel="noopener noreferrer"
           onClick={stopDrag} // block drag start on click

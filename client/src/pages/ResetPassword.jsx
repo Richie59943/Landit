@@ -110,13 +110,20 @@ const ResetPassword = () => {
           </div>
 
           {message && (
-            <p className="rounded-md border border-emerald-100 bg-emerald-50 px-3 py-2 text-xs text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-200">
+            <p
+              role="status"
+              aria-live="polite"
+              className="rounded-md border border-emerald-100 bg-emerald-50 px-3 py-2 text-xs text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-200"
+            >
               {message}
             </p>
           )}
 
           {error && (
-            <p className="rounded-md border border-red-100 bg-red-50 px-3 py-2 text-xs text-red-600 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-200">
+            <p
+              role="alert"
+              className="rounded-md border border-red-100 bg-red-50 px-3 py-2 text-xs text-red-600 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-200"
+            >
               {error}
             </p>
           )}
@@ -124,6 +131,7 @@ const ResetPassword = () => {
           <button
             type="submit"
             disabled={loading || tokenStatus !== "valid"}
+            aria-busy={loading || tokenStatus === "checking"}
             className="mt-1 inline-flex w-full items-center justify-center rounded-lg bg-sky-500 py-2.5 text-sm font-semibold text-white shadow-md shadow-sky-300/20 transition-colors hover:bg-sky-700 disabled:cursor-not-allowed disabled:bg-sky-400"
           >
             {tokenStatus === "checking" ? (
