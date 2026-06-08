@@ -564,6 +564,7 @@ const Dashboard = () => {
                     type="url"
                     value={joblink}
                     onChange={(e) => setJoblink(e.target.value)}
+                    disabled={isParsingLink}
                     placeholder="Paste Job URL"
                     className="
                       w-full
@@ -583,6 +584,7 @@ const Dashboard = () => {
                     type="button"
                     onClick={handleParseJobLink}
                     disabled={isParsingLink}
+                    aria-busy={isParsingLink}
                     className="
                       inline-flex min-h-[42px] items-center justify-center
                       rounded-xl bg-blue-600 px-5 py-2.5
@@ -607,6 +609,8 @@ const Dashboard = () => {
 
                 {parseMessage && (
                   <div
+                    role={parseStatus === "success" ? "status" : "alert"}
+                    aria-live="polite"
                     className={`mt-3 rounded-xl border px-4 py-3 text-sm ${
                       parseStatus === "success"
                         ? "border-emerald-200 bg-white text-emerald-700 dark:border-emerald-900 dark:bg-slate-950 dark:text-emerald-200"

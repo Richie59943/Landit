@@ -153,7 +153,10 @@ const Register = () => {
 
             {/* Error message (if any) */}
             {error && (
-              <p className="text-xs text-red-600 bg-red-50 border border-red-100 rounded-md px-3 py-2 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-200">
+              <p
+                role="alert"
+                className="text-xs text-red-600 bg-red-50 border border-red-100 rounded-md px-3 py-2 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-200"
+              >
                 {error}
               </p>
             )}
@@ -162,6 +165,7 @@ const Register = () => {
             <button
               type="submit"
               disabled={loading} // disable button while loading
+              aria-busy={loading}
               className={` w-full mt-1
                 rounded-lg
                 ${loading ? "bg-green-400" : "bg-green-500 hover:bg-green-700"}
